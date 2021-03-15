@@ -29,7 +29,6 @@ exports.login = async (req, res) => {
         );
 
         user.password = undefined;
-
         return res.status(200).send({ token, user });
       }
 
@@ -39,6 +38,7 @@ exports.login = async (req, res) => {
     throw err;
   }
 };
+exports.isLogged = (req, res) => {};
 
 exports.getMe = (req, res) => {
   return res.jsend.success({ user: req._user });

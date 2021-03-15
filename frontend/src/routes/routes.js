@@ -1,5 +1,5 @@
-import React, { Fragment, lazy, Suspense, memo } from "react";
-import { Switch, Route, Redirect } from "react-router-dom";
+import React, { lazy, memo, Suspense } from "react";
+import { BrowserRouter, Switch, Route } from "react-router-dom";
 
 const routesConfig = [
   {
@@ -20,33 +20,29 @@ const routesConfig = [
   {
     path: "/collection/:collectionId?",
     exact: true,
-    component: lazy(() =>
-      import("../Pages/CollectionDetails/CollectionDetails")
-    ),
+    component: lazy(() => import("../Pages/Collection/Collection")),
   },
   {
     path: "/profile/:userId?",
     exact: true,
-    component: lazy(() => import("../Pages/ProfileDetails/ProfileDetails")),
+    component: lazy(() => import("../Pages/Profile/Profile")),
   },
   {
     path: "/card/:cardId?",
     exact: true,
-    component: lazy(() => import("../Pages/CardDetails/CardDetails")),
-  },
-  {
-    path: "/card/",
-    exact: true,
     component: lazy(() => import("../Pages/Card/Card")),
   },
   {
+    path: "/register",
     exact: true,
-    path: "*",
+    component: lazy(() => import("../Pages/NewUser/NewUser")),
+  },
+  {
     component: lazy(() => import("../Pages/NoMatchPage/NoMatchPage")),
   },
 ]; //end routes
 
-const renderRoutes = (routes, user) => {
+const renderRoutes = (routes) => {
   if (!routes) {
     return null;
   }
@@ -55,28 +51,13 @@ const renderRoutes = (routes, user) => {
     <Suspense>
       <Switch>
         {routes.map((route, i) => {
-          const Layout = route.layout || Fragment;
-          const Component = route.component;
-          const RouteComponent = Route;
-
           return (
-            <RouteComponent
-              key={route.path || i}
+            <Route
+              key={i}
+              exact
               path={route.path}
-              exact={route.exact}
-              showFor={route.showFor}
-              user={user}
-            >
-              {(props) => (
-                <Layout>
-                  {route.routes ? (
-                    renderRoutes(route.routes, user)
-                  ) : (
-                    <Component user={user} {...props} />
-                  )}
-                </Layout>
-              )}
-            </RouteComponent>
+              component={route.component}
+            />
           );
         })}
       </Switch>
@@ -84,8 +65,8 @@ const renderRoutes = (routes, user) => {
   );
 };
 
-function Routes({ user }) {
-  return renderRoutes(routesConfig, user);
+function Routes() {
+  return renderRoutes(routesConfig);
 }
 
 export default memo(Routes);

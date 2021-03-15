@@ -1,29 +1,24 @@
 // Base
-import { React, useState, useEffect } from "react";
-import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
-import Login from "./Pages/Login/Login";
+import { React } from "react";
+
+//routes
+import Routes from "./routes/routes";
+import { Redirect } from "react-router-dom";
+//components
+import NavBar from "./Components/NavBar/NavBar";
+import { getJwt } from "./Utils/jwt";
+
+//Material UI components
+import Grid from "@material-ui/core/Grid";
 
 function App() {
-  const [token, setToken] = useState(null);
-
-  useEffect(() => {
-    console.log(token);
-  }, [token]);
-
+  const TOKEN = getJwt();
+  if (!TOKEN) return <Redirect to="/login" />;
   return (
-    <BrowserRouter>
-      <Switch>
-        <Route>
-          {token ? (
-            <Redirect to="/dashboard" />
-          ) : (
-            <Route path="/login">
-              <Login setToken={setToken} />
-            </Route>
-          )}
-        </Route>
-      </Switch>
-    </BrowserRouter>
+    <Grid>
+      <NavBar />
+      <Routes />
+    </Grid>
   );
 }
 

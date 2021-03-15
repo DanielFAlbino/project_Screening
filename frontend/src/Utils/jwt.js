@@ -1,15 +1,15 @@
-export const getJwt = () => localStorage.getItem("hr-token");
+export const getJwt = () => localStorage.getItem("token");
 
 export const clearJwt = () => {
   try {
-    return localStorage.removeItem("hr-token");
+    return localStorage.removeItem("token");
   } catch {
     console.log("Error removing token");
   }
 };
 export const setJwt = (token) => {
   try {
-    localStorage.setItem("hr-token", token);
+    localStorage.setItem("token", token);
   } catch {
     console.log("Error setting token");
   }
@@ -29,9 +29,9 @@ export const clearUser = () => {
     console.log("Error clearing user");
   }
 };
-export const setUser = (token) => {
+export const setUser = (user) => {
   try {
-    localStorage.setItem("user", JSON.stringify(token));
+    localStorage.setItem("user", user);
   } catch {
     console.log("Error setting user");
   }

@@ -1,13 +1,9 @@
-import { React, useState, Suspense } from "react";
+import { React, useState } from "react";
+import { makeStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
-import { makeStyles } from "@material-ui/core/styles";
-import { login } from "../../Services/auth";
-import { setJwt, setUser } from "../../Utils/jwt";
-import { BrowserRouter, Redirect, Link } from "react-router-dom";
-
-require("dotenv").config();
+import { update } from "../../Services/user";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -19,14 +15,18 @@ const useStyles = makeStyles((theme) => ({
   },
   btn: {
     marginTop: "40px",
-    width: "100vh",
+    width: "62vh",
     height: "40px",
   },
 }));
 
-function Login() {
+function Profile() {
   const classes = useStyles();
-  const [formData, setFormData] = useState({ username: "", password: "" });
+  const [formData, setFormData] = useState({
+    username: "",
+    name: "",
+    password: "",
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (name) => (event) => {
@@ -40,40 +40,33 @@ function Login() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    await login(formData).then((res) => {
-      if (res) {
-        setJwt(res.token);
-        setUser(res.user._id);
-        setIsSubmitting(false);
-        <Suspense>
-          <BrowserRouter>
-            <Redirect to="/dashboard" />
-          </BrowserRouter>
-        </Suspense>;
-
-        return res;
-      } else {
-        console.log("not logged in!");
-      }
+    await update(formData).then((res) => {
       setIsSubmitting(false);
+      if (res) {
+        return res.startus(200).send("User updated!");
+      } else {
+        return res.startus(400).send("Impossible to update user!");
+      }
     });
   };
 
   return (
     <Grid container direction="row" justify="center" alignItems="center">
-      <form
-        className={classes.root}
-        noValidate
-        autoComplete="off"
-        onSubmit={handleSubmit(formData)}
-      >
+      <form noValidate autoComplete="off" onSubmit={handleSubmit(formData)}>
         <Grid>
           <TextField
             name="username"
             label="username"
-            type="username"
+            type="text"
             onChange={handleChange("username")}
             value={formData.username}
+          />
+          <TextField
+            name="name"
+            label="name"
+            type="text"
+            value={formData.name}
+            onChange={handleChange("name")}
           />
           <TextField
             name="password"
@@ -94,16 +87,9 @@ function Login() {
             Login
           </Button>
         </Grid>
-        <Grid>
-          <Suspense>
-            <BrowserRouter>
-              <Link to="/register">New user!</Link>
-            </BrowserRouter>
-          </Suspense>
-        </Grid>
       </form>
     </Grid>
   );
 }
 
-export default Login;
+export default Profile;

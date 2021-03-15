@@ -8,6 +8,7 @@ const AuthController = require("../controller/AuthController");
 
 router.post("/login", AuthController.login);
 router.post("/signup", AuthController.signup);
+router.post("/verify/:secret?", AuthController.isLogged);
 
 router.get("/me", checkAuth, AuthController.getMe);
 
