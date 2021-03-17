@@ -4,39 +4,37 @@ const bcrypt = require("bcryptjs");
 require("dotenv").config();
 
 exports.login = async (req, res) => {
-  try {
-    const user = await UserModel.findOne({
-      username: req.body.username,
-    })
-      .select("password")
-      .exec();
+  const user = await UserModel.findOne({
+    username: req.body.username,
+  })
+    .select("password")
+    .select("isAdmin")
+    .exec();
 
-    if (!user) {
-      return res.status(400).send({ message: "The username does not exist" });
+  if (!user) {
+    return res.status(404).json({ message: "Username not found!" });
+  }
+
+  //Hash password
+  await bcrypt.compare(req.body.password, user.password).then((result) => {
+    if (result) {
+      const token = jwt.sign(
+        {
+          userId: user._id,
+          admin: user.isAdmin,
+        },
+        process.env.JWT_KEY,
+        {
+          expiresIn: process.env.JWT_HOURS_DURATION + "h",
+        }
+      );
+
+      user.password = undefined;
+      return res.status(200).json({ token, user });
     }
 
-    //Hash password
-    await bcrypt.compare(req.body.password, user.password).then((result) => {
-      if (result) {
-        const token = jwt.sign(
-          {
-            userId: user._id,
-          },
-          process.env.JWT_KEY,
-          {
-            expiresIn: process.env.JWT_HOURS_DURATION + "h",
-          }
-        );
-
-        user.password = undefined;
-        return res.status(200).send({ token, user });
-      }
-
-      return res.status(400).send({ message: "Wrong username or password" });
-    });
-  } catch (err) {
-    throw err;
-  }
+    return res.status(400).json({ message: "Wrong username or password" });
+  });
 };
 exports.isLogged = (req, res) => {};
 
@@ -50,7 +48,7 @@ exports.getUser = async (req, res) => {
       _id: req.body._id,
     });
     if (!user) {
-      return res.status(404);
+      return res.status(404).json({ message: "user not found!" });
     }
     return res.status(200).json(user);
   } catch (err) {
@@ -69,7 +67,7 @@ exports.signup = async (req, res) => {
       username: req.body.username,
       name: req.body.name,
       password: req.body.password,
-      isAdmin: req.body.isAdmin,
+      isAdmin: false,
     });
 
     // Save User in the database
@@ -81,10 +79,10 @@ exports.signup = async (req, res) => {
         let payload = { id: registeredUser._id, isAdmin: req.body.isAdmin };
         jwt.sign(payload, process.env.JWT_KEY);
 
-        res.status(200).send("Registed!");
+        res.status(200).json({ message: "Registed!" });
       }
     });
   } else {
-    return res.status(409).json("Username already exists!");
+    return res.status(409).json({ message: "Username already exists!" });
   }
 };

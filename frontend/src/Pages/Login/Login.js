@@ -1,11 +1,16 @@
-import { React, useState, Suspense } from "react";
+import { React, useState, useCallback, useEffect } from "react";
+
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
+import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
+
 import { login } from "../../Services/auth";
-import { setJwt, setUser } from "../../Utils/jwt";
-import { BrowserRouter, Redirect, Link } from "react-router-dom";
+import { setUser, setToken } from "../../Utils/localStorage";
+import { Link } from "react-router-dom";
+
+import { useHistory } from "react-router-dom";
 
 require("dotenv").config();
 
@@ -14,76 +19,107 @@ const useStyles = makeStyles((theme) => ({
     "& .MuiTextField-root": {
       margin: theme.spacing(1),
       width: "25ch",
-      marginTop: "40vh",
+      marginTop: "20vh",
     },
   },
+  grid: {
+    height: "60px",
+    marginBottom: "5px",
+  },
   btn: {
-    marginTop: "40px",
-    width: "100vh",
+    marginLeft: "7px",
+    marginTop: "20px",
+    marginBottom: "30px",
     height: "40px",
+    width: "100vh",
+  },
+  tf: {
+    width: "100vh !important",
+  },
+
+  message: {
+    margin: "10px",
   },
 }));
 
 function Login() {
   const classes = useStyles();
   const [formData, setFormData] = useState({ username: "", password: "" });
+  const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const history = useHistory();
+  const goTo = useCallback(() => history.push("/dashboard"), [history]);
 
   const handleChange = (name) => (event) => {
     setFormData({
       ...formData,
-      [name]: event.target.value,
+      [name]: event.target.value.replace(/  +/g, " "),
     });
   };
+
+  useEffect(() => {
+    setMessage("");
+  }, [formData]);
 
   const handleSubmit = (formData) => async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-
-    await login(formData).then((res) => {
-      if (res) {
-        setJwt(res.token);
-        setUser(res.user._id);
-        setIsSubmitting(false);
-        <Suspense>
-          <BrowserRouter>
-            <Redirect to="/dashboard" />
-          </BrowserRouter>
-        </Suspense>;
-
-        return res;
-      } else {
-        console.log("not logged in!");
-      }
+    if (!formData.username.trim() || !formData.password.trim()) {
       setIsSubmitting(false);
-    });
+      setMessage("All fields are required");
+      return;
+    } else {
+      try {
+        await login(formData).then((res) => {
+          setUser(res.user);
+          setToken(res.token);
+          goTo();
+        });
+      } catch (err) {
+        setMessage(err.response.data.message);
+      }
+    }
+
+    setIsSubmitting(false);
   };
 
   return (
-    <Grid container direction="row" justify="center" alignItems="center">
+    <Grid
+      container
+      direction="row"
+      justify="center"
+      alignItems="center"
+      alignContent="center"
+    >
       <form
         className={classes.root}
         noValidate
         autoComplete="off"
         onSubmit={handleSubmit(formData)}
       >
-        <Grid>
+        <Grid className={classes.grid} container lg={12}>
           <TextField
             name="username"
             label="username"
-            type="username"
+            type="text"
+            variant="outlined"
+            className={classes.tf}
             onChange={handleChange("username")}
             value={formData.username}
           />
+        </Grid>
+        <Grid container lg={12}>
           <TextField
             name="password"
             label="password"
             type="password"
+            variant="outlined"
+            className={classes.tf}
             value={formData.password}
             onChange={handleChange("password")}
           />
         </Grid>
-        <Grid>
+        <Grid container lg={12}>
           <Button
             className={classes.btn}
             disabled={isSubmitting}
@@ -95,12 +131,15 @@ function Login() {
           </Button>
         </Grid>
         <Grid>
-          <Suspense>
-            <BrowserRouter>
-              <Link to="/register">New user!</Link>
-            </BrowserRouter>
-          </Suspense>
+          <Link to="/register">New user!</Link>
         </Grid>
+        {message ? (
+          <Typography color="error" variant="overline" display="inline">
+            {message}
+          </Typography>
+        ) : (
+          <Typography></Typography>
+        )}
       </form>
     </Grid>
   );

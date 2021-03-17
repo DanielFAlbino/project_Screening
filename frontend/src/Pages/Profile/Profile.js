@@ -1,9 +1,12 @@
-import { React, useState } from "react";
+import { React, useState, useCallback } from "react";
+
 import { makeStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
+
 import { update } from "../../Services/user";
+import { useHistory } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -14,8 +17,9 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   btn: {
+    margin: "10px",
     marginTop: "40px",
-    width: "62vh",
+    width: "40vh",
     height: "40px",
   },
 }));
@@ -28,6 +32,9 @@ function Profile() {
     password: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const history = useHistory();
+  const goBack = useCallback(() => history.push("/dashboard"), [history]);
 
   const handleChange = (name) => (event) => {
     setFormData({
@@ -85,6 +92,15 @@ function Profile() {
             type="submit"
           >
             Login
+          </Button>
+          <Button
+            className={classes.btn}
+            disabled={isSubmitting}
+            variant="contained"
+            color="inherit"
+            onClick={goBack}
+          >
+            Cancel
           </Button>
         </Grid>
       </form>

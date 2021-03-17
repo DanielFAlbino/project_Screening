@@ -1,5 +1,6 @@
 import React, { lazy, memo, Suspense } from "react";
-import { BrowserRouter, Switch, Route } from "react-router-dom";
+import { Switch, Route, Redirect, BrowserRouter } from "react-router-dom";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 const routesConfig = [
   {
@@ -46,21 +47,25 @@ const renderRoutes = (routes) => {
   if (!routes) {
     return null;
   }
-
   return (
-    <Suspense>
-      <Switch>
-        {routes.map((route, i) => {
-          return (
-            <Route
-              key={i}
-              exact
-              path={route.path}
-              component={route.component}
-            />
-          );
-        })}
-      </Switch>
+    <Suspense fallback={<CircularProgress />}>
+      <BrowserRouter>
+        <Switch>
+          <Route exact path="/">
+            <Redirect to="/login" />
+          </Route>
+          {routes.map((route, i) => {
+            return (
+              <Route
+                key={i}
+                exact
+                path={route.path}
+                component={route.component}
+              />
+            );
+          })}
+        </Switch>
+      </BrowserRouter>
     </Suspense>
   );
 };
