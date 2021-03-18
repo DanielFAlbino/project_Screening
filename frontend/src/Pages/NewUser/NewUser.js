@@ -6,10 +6,9 @@ import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 
-import { login } from "../../Services/auth";
+import { add } from "../../Services/auth";
 import { setUser, setToken } from "../../Utils/localStorage";
-import { Link } from "react-router-dom";
-
+import Navbar from "../../Components/NavBar/NavBar";
 import { useHistory } from "react-router-dom";
 
 require("dotenv").config();
@@ -52,8 +51,7 @@ function Login() {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const history = useHistory();
-  const goTo = useCallback(() => history.push("/dashboard"), [history]);
-  const goBack = useCallback(() => history.push("/login"), [history]);
+  const goTo = useCallback(() => history.push("/login"), [history]);
 
   const handleChange = (name) => (event) => {
     setFormData({
@@ -79,19 +77,11 @@ function Login() {
       return;
     } else {
       try {
-        /* await login(formData)
-        .then((res) => {
-          if (res) {
-            setUser(res.user);
-            setToken(res.token);
-            goTo();
-          } else {
-            console.log("not logged in!");
-          }
-        })
-        .catch(() => {
-          setMessage("Wrong Username or Password");
-        }); */
+        await add(formData).then((res) => {
+          setUser(res.user);
+          setToken(res.token);
+          goTo();
+        });
       } catch (err) {
         setMessage(err.response.data.message);
       }
@@ -107,6 +97,7 @@ function Login() {
       alignItems="center"
       alignContent="center"
     >
+      <Navbar />
       <form
         className={classes.root}
         noValidate
@@ -162,7 +153,7 @@ function Login() {
             disabled={isSubmitting}
             variant="contained"
             color="inherit"
-            onClick={goBack}
+            onClick={goTo}
           >
             Cancel
           </Button>

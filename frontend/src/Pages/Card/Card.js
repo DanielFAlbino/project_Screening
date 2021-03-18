@@ -1,12 +1,13 @@
-import { React, useState, useCallback } from "react";
+import { React, useState, useCallback, useEffect } from "react";
 
 //components
 import Grid from "@material-ui/core/Grid";
-import TextField from "@material-ui/core/TextField";
-import Button from "@material-ui/core/Button";
-
+import { TextField, TextareaAutosize, Button } from "@material-ui/core";
+import Navbar from "../../Components/NavBar/NavBar";
 import { useHistory } from "react-router-dom";
-
+import { getCard, update } from "../../Services/card";
+import { getUserId } from "../../Utils/localStorage";
+import AlertMessage from "../../Components/Alerts/Alerts";
 //style
 import { makeStyles } from "@material-ui/core/styles";
 
@@ -15,7 +16,7 @@ const useStyles = makeStyles((theme) => ({
     "& .MuiTextField-root": {
       margin: theme.spacing(1),
       width: "25ch",
-      marginTop: "40vh",
+      marginTop: "30vh",
     },
   },
   btn: {
@@ -24,10 +25,16 @@ const useStyles = makeStyles((theme) => ({
     width: "40vh",
     height: "40px",
   },
+  Area: {
+    margin: "10px",
+    width: "90vh",
+  },
 }));
 
-function Card() {
+function Card(props) {
+  const card = props.match.params.cardId;
   const classes = useStyles();
+  var Message;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     cardNumber: 0,
@@ -43,12 +50,39 @@ function Card() {
       [name]: event.target.value,
     });
   };
+
+  const handelGetCard = async () => {
+    const data = await getCard(card).then((res) => res);
+    setFormData({
+      _id: data.card._id,
+      cardNumber: 0,
+      name: data.card.name,
+      description: data.card.description,
+    });
+  };
+
   const handleSubmit = (formData) => async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    const user = JSON.parse(getUserId());
+    let message;
+    formData.userId = user._id;
+    if (card) {
+      message = await update(formData._id, formData).then((res) => {
+        return res.message;
+      });
+    }
+    setIsSubmitting(false);
+    Message = <AlertMessage message={message} />;
   };
+
+  useEffect(() => {
+    handelGetCard();
+  }, []);
+
   return (
     <Grid container direction="row" justify="center" alignItems="center">
+      <Navbar />
       <form
         className={classes.root}
         noValidate
@@ -70,12 +104,14 @@ function Card() {
             value={formData.name}
             onChange={handleChange("name")}
           />
-          <TextField
-            name="description"
-            label="description"
-            type="text"
-            fullWidth
-            value={formData.description}
+        </Grid>
+        <Grid>
+          <TextareaAutosize
+            aria-label="empty textarea"
+            className={classes.Area}
+            rows={5}
+            rowsMax={10}
+            defaultValue={formData.description}
             onChange={handleChange("description")}
           />
         </Grid>

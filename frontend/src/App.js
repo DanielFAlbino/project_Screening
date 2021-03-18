@@ -1,22 +1,27 @@
 // Base
-import { React } from "react";
+import { React, useEffect } from "react";
+import { Redirect, useLocation } from "react-router-dom";
 
 //routes
 import Routes from "./routes/routes";
 
-//components
-import NavBar from "./Components/NavBar/NavBar";
-
-//Material UI components
-import Grid from "@material-ui/core/Grid";
+import { getUserId } from "./Utils/localStorage";
 
 function App() {
-  return (
-    <Grid>
-      <NavBar />
-      <Routes />
-    </Grid>
-  );
+  const user = getUserId();
+  const location = window.location.pathname;
+
+  useEffect(() => {
+    if (user && location === "/login") {
+      return <Redirect to="/dashboard" />;
+    }
+
+    if (!user && location !== "/login") {
+      return <Redirect to="/login" />;
+    }
+  }, []);
+
+  return <Routes />;
 }
 
 export default App;

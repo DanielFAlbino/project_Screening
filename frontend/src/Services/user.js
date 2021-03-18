@@ -1,6 +1,17 @@
 /* import api from "./api"; */
 import axios from "axios";
+import { getToken } from "../Utils/localStorage";
 const URL = process.env.REACT_APP_API_URL || "http://localhost:3000";
+const config = {
+  headers: {
+    Authorization: "Bearer " + getToken(),
+  },
+};
+
+async function getUser(userId) {
+  const res = await axios.get(URL + "/api/user/" + userId, config);
+  return res ? res.data : "username or password incorrect";
+}
 
 async function update(payload) {
   const res = await axios.post(URL + "/api/user/update/", payload);
@@ -12,4 +23,4 @@ async function remove(payload) {
   return res ? res.data : "username or password incorrect";
 }
 
-export { update, remove };
+export { getUser, update, remove };

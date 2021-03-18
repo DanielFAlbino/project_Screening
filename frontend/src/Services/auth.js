@@ -12,6 +12,11 @@ async function login(payload) {
   return res ? res.data : "username or password incorrect";
 }
 
+async function add(payload) {
+  const res = await axios.post(URL + "/api/auth/signup", payload);
+  return res ? res.data : "username or password incorrect";
+}
+
 async function update(payload) {
   const res = await axios.post(URL + "/api/user/update/user", payload);
   return res ? res.data : "username or password incorrect";
@@ -22,4 +27,4 @@ async function checkAuth(payload) {
   return res ? res.data : "User not logged In!";
 }
 
-export { me, login, update, checkAuth };
+export { me, login, update, checkAuth, add };

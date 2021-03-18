@@ -11,6 +11,11 @@ async function getCollection(collectionId) {
   const res = await axios.get(URL + "/collection/" + collectionId, config);
   return res ? res.data : "card not found!";
 }
+async function getCollectionByUser(userId) {
+  const res = await axios.get(URL + "/collection/user/" + userId, config);
+  return res ? res.data : "card not found!";
+}
+
 async function getAllCollection() {
   const res = await axios.get(URL + "/collection/all", config);
   return res ? res.data : "card not found!";
@@ -26,4 +31,10 @@ async function removeCollection(payload) {
   return res ? res.data : "card not found!";
 }
 
-export { getCollection, updateCollection, removeCollection, getAllCollection };
+export {
+  getCollectionByUser,
+  getCollection,
+  updateCollection,
+  removeCollection,
+  getAllCollection,
+};

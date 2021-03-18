@@ -1,9 +1,13 @@
-const getUser = () => {
+const getUserId = () => {
   return localStorage.getItem("user");
 };
 
 const setUser = (user) => {
   localStorage.setItem("user", JSON.stringify(user));
+};
+
+const removeUser = () => {
+  localStorage.removeItem("user");
 };
 
 const getToken = () => {
@@ -14,4 +18,8 @@ const setToken = (token) => {
   localStorage.setItem("token", token);
 };
 
-export { getUser, setUser, getToken, setToken };
+const removeToken = () => {
+  localStorage.removeItem("token");
+};
+
+export { getUserId, setUser, removeUser, getToken, setToken, removeToken };

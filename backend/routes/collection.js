@@ -10,6 +10,7 @@ router.put("/update/:collectionId?", checkAuth, CollectionController.update);
 router.post("/add", checkAuth, CollectionController.add);
 router.get("/all", checkAuth, CollectionController.get);
 router.get("/:collectionId?", checkAuth, CollectionController.getCollection);
+router.get("/user/:userId?", checkAuth, CollectionController.getByUser);
 router.delete("/delete/:collectionId?", checkAuth, CollectionController.delete);
 
 module.exports = router;

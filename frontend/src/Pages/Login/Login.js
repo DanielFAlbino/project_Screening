@@ -9,7 +9,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { login } from "../../Services/auth";
 import { setUser, setToken } from "../../Utils/localStorage";
 import { Link } from "react-router-dom";
-
+import Navbar from "../../Components/NavBar/NavBar";
 import { useHistory } from "react-router-dom";
 
 require("dotenv").config();
@@ -91,6 +91,7 @@ function Login() {
       alignItems="center"
       alignContent="center"
     >
+      <Navbar />
       <form
         className={classes.root}
         noValidate

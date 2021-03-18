@@ -1,11 +1,16 @@
 import { React, useState, useEffect } from "react";
 import Grid from "@material-ui/core/Grid";
-import { Table } from "./components";
-
+import CollectionsTable from "./components/Table/CollectionsTable/CollectionTable";
+import CardsTable from "./components/Table/CardsTable/CardsTable";
+import Navbar from "../../Components/NavBar/NavBar";
 import { makeStyles } from "@material-ui/core/styles";
-import { getUser } from "../../Utils/localStorage";
-import { getCollection, getAllCollection } from "../../Services/collection";
+import { getUserId } from "../../Utils/localStorage";
+import {
+  getAllCollection,
+  getCollectionByUser,
+} from "../../Services/collection";
 import { getAllCards, getCards } from "../../Services/card";
+import { getUser } from "../../Services/user";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -16,47 +21,67 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   table: {
-    margin: "10px",
-    marginTop: "2%",
+    margin: "5vh",
+    marginTop: "10vh",
   },
 }));
 
 function Dashboard() {
   const classes = useStyles();
-  const user = getUser();
-  const [collection, setCollection] = useState([]);
-  const [card, setCard] = useState([]);
-  const [collectionKeys, setCollectionKeys] = useState([]);
+  const user = getUserId();
   const [collectionValues, setCollectionValues] = useState([]);
-  const [cardKeys, setCardKeys] = useState([]);
-  const [cardvalues, setCardValues] = useState([]);
+  const [cardValues, setCardValues] = useState([]);
+
+  const collectionHeader = ["Collection", "User", "Actions"];
+  const cardHeader = ["Name", "Description", "Added by", "Actions"];
+
+  const onGetUser = async (userId) => {
+    const user = await getUser(userId).then((res) => {
+      return res.username;
+    });
+
+    return user;
+  };
 
   const collections = async () => {
     const userId = JSON.parse(user)._id;
     let data;
+    let arr1 = [];
+
     if (JSON.parse(user).isAdmin) {
       data = await getAllCollection().then((res) => {
         return res.collections;
       });
     } else {
-      data = await getCollection(userId).then((res) => {
+      data = await getCollectionByUser(userId).then((res) => {
         return res.collections;
       });
     }
-    setCollectionKeys(Object.keys(data[0]));
-    let arr1 = [];
+    if (data.length > 1) {
+      data.map((arr) => {
+        arr1.push(Object.values(arr));
+      });
+      arr1.map((row) => {
+        getUser(row[3]).then((res) => {
+          row.push(res);
+        });
+      });
+    } else {
+      arr1.push(Object.values(data[0]));
+    }
     data.map((arr) => {
       arr1.push(Object.values(arr));
     });
-
     setCollectionValues(arr1);
-    setCollection(data);
+
     return;
   };
 
   const cards = async () => {
     const userId = JSON.parse(user)._id;
     let data;
+    let arr1 = [];
+
     if (JSON.parse(user).isAdmin) {
       data = await getAllCards().then((res) => {
         return res.cards;
@@ -66,14 +91,20 @@ function Dashboard() {
         return res.cards;
       });
     }
-    setCardKeys(Object.keys(data[0]));
 
-    let arr1 = [];
-    data.map((arr) => {
-      arr1.push(Object.values(arr));
-    });
+    if (data.length > 1) {
+      data.map((arr) => {
+        arr1.push(Object.values(arr));
+      });
+      arr1.map((row) => {
+        getUser(row[3]).then((res) => {
+          row.push(res);
+        });
+      });
+    } else {
+      arr1.push(Object.values(data[0]));
+    }
     setCardValues(arr1);
-    return;
   };
 
   useEffect(() => {
@@ -83,11 +114,22 @@ function Dashboard() {
 
   return (
     <Grid container direction="row" justify="center" alignItems="center">
-      <Grid xs={3} className={classes.table}>
-        <Table data={collectionValues} titles={collectionKeys} />
-      </Grid>
-      <Grid xs={8} className={classes.table}>
-        <Table data={card} titles={cardKeys} />
+      <Navbar />
+      <Grid container direction="row" justify="center">
+        <Grid container xs={4} className={classes.table}>
+          <CollectionsTable
+            isAdmin={JSON.parse(user).isAdmin}
+            data={collectionValues}
+            titles={collectionHeader}
+          />
+        </Grid>
+        <Grid container xs={6} className={classes.table}>
+          <CardsTable
+            isAdmin={JSON.parse(user).isAdmin}
+            data={cardValues}
+            titles={cardHeader}
+          />
+        </Grid>
       </Grid>
     </Grid>
   );

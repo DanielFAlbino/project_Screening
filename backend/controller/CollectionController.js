@@ -28,6 +28,22 @@ exports.getCollection = async (req, res) => {
     throw err;
   }
 };
+exports.getByUser = async (req, res) => {
+  const _id = req.params.userId;
+  try {
+    const collections = await CollectionModel.find({
+      userId: _id,
+    });
+    if (!collections || collections.length == 0) {
+      return res
+        .status(404)
+        .json({ message: "The User doesn't have any collections." });
+    }
+    return res.status(200).json({ collections });
+  } catch (err) {
+    throw err;
+  }
+};
 
 exports.update = async (req, res) => {
   const _id = req.params.collectionId;

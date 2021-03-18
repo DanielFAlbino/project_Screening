@@ -2,7 +2,7 @@ const CardModel = require("../models/CardModel");
 
 exports.getCardsByUser = async (req, res) => {
   try {
-    const cards = await CardModel.findOne({
+    const cards = await CardModel.find({
       userId: req.params.userId,
     });
     if (!cards) {
@@ -14,9 +14,23 @@ exports.getCardsByUser = async (req, res) => {
   }
 };
 
+exports.getCardById = async (req, res) => {
+  try {
+    const card = await CardModel.findOne({
+      _id: req.params.cardId,
+    });
+    if (!card) {
+      return res.status(404).json({ message: "Card not found!" });
+    }
+    return res.status(200).json({ card });
+  } catch (err) {
+    throw err;
+  }
+};
+
 exports.getAllCards = async (req, res) => {
   if (!req._user.isAdmin) {
-    return res.status(401).json({ message: "You don't have permition" });
+    return res.status(401).json({ message: "You don't have permission" });
   }
   try {
     const cards = await CardModel.find();
@@ -31,7 +45,7 @@ exports.getAllCards = async (req, res) => {
 
 exports.add = async (req, res) => {
   if (req._user.isAdmin) {
-    return res.status(401).json({ message: "You don't have permition" });
+    return res.status(401).json({ message: "You don't have permission" });
   }
 
   const card = await CardModel.findOne({
@@ -58,9 +72,9 @@ exports.update = async (req, res) => {
     name: req.body.name,
     cardNumber: req.body.cardNumber,
     description: req.body.description,
+    userId: req.body.userId,
   };
-
-  await CardModel.updateOne({ _id }, { $set: cardParams })
+  await CardModel.updateOne({ _id: _id }, { $set: cardParams })
     .then(() => {
       return res.status(200).json({ message: "Card updated!" });
     })

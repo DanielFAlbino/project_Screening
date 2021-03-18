@@ -1,5 +1,5 @@
 import React, { lazy, memo, Suspense } from "react";
-import { Switch, Route, Redirect, BrowserRouter } from "react-router-dom";
+import { Switch, Route, BrowserRouter } from "react-router-dom";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
 const routesConfig = [
@@ -38,22 +38,20 @@ const routesConfig = [
     exact: true,
     component: lazy(() => import("../Pages/NewUser/NewUser")),
   },
-  {
+  /* {
     component: lazy(() => import("../Pages/NoMatchPage/NoMatchPage")),
-  },
+  }, */
 ]; //end routes
 
 const renderRoutes = (routes) => {
   if (!routes) {
     return null;
   }
+
   return (
     <Suspense fallback={<CircularProgress />}>
       <BrowserRouter>
         <Switch>
-          <Route exact path="/">
-            <Redirect to="/login" />
-          </Route>
           {routes.map((route, i) => {
             return (
               <Route
@@ -70,7 +68,7 @@ const renderRoutes = (routes) => {
   );
 };
 
-function Routes() {
+function Routes(token) {
   return renderRoutes(routesConfig);
 }
 

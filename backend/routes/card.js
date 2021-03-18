@@ -11,6 +11,7 @@ router.put("/update/:cardId?", checkAuth, CardController.update);
 router.post("/card", checkAuth, CardController.add);
 router.delete("/:cardId?", checkAuth, CardController.delete);
 router.get("/user/:userId?", checkAuth, CardController.getCardsByUser);
-router.get("/all", checkAuth, CardController.getAllCards);
+router.get("/:cardId?", checkAuth, CardController.getCardById);
+router.get("/cards/all", checkAuth, CardController.getAllCards);
 
 module.exports = router;

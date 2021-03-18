@@ -9,17 +9,26 @@ const config = {
 };
 
 async function getCards(userId) {
-  const res = await axios.get(URL + "/card/user/" + userId, config);
+  const res = await axios.get(URL + "/api/card/user/" + userId, config);
+  return res ? res.data : "card not found!";
+}
+
+async function getCard(cardId) {
+  const res = await axios.get(URL + "/api/card/" + cardId, config);
   return res ? res.data : "card not found!";
 }
 
 async function getAllCards() {
-  const res = await axios.get(URL + "/api/card/all", config);
+  const res = await axios.get(URL + "/api/card/cards/all", config);
   return res ? res.data : "card not found!";
 }
 
-async function update(payload) {
-  const res = await axios.post(URL + "/api/card/update/", payload);
+async function update(userId, payload) {
+  const res = await axios.put(
+    URL + "/api/card/update/" + userId,
+    payload,
+    config
+  );
   return res ? res.data : "card not found!";
 }
 
@@ -28,4 +37,4 @@ async function remove(payload) {
   return res ? res.data : "card not found!";
 }
 
-export { update, remove, getAllCards, getCards };
+export { update, remove, getAllCards, getCards, getCard };
