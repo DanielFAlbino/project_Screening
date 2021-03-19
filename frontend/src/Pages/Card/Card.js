@@ -55,7 +55,7 @@ function Card(props) {
     const data = await getCard(card).then((res) => res);
     setFormData({
       _id: data.card._id,
-      cardNumber: 0,
+      cardNumber: data.card.cardNumber,
       name: data.card.name,
       description: data.card.description,
     });
@@ -71,9 +71,9 @@ function Card(props) {
       message = await update(formData._id, formData).then((res) => {
         return res.message;
       });
+      console.log(message);
     }
     setIsSubmitting(false);
-    Message = <AlertMessage message={message} />;
   };
 
   useEffect(() => {

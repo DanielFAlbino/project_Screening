@@ -13,6 +13,11 @@ async function getUser(userId) {
   return res ? res.data : "username or password incorrect";
 }
 
+async function getUsers() {
+  const res = await axios.get(URL + "/api/user/users/all", config);
+  return res ? res.data : "username or password incorrect";
+}
+
 async function update(payload) {
   const res = await axios.post(URL + "/api/user/update/", payload);
   return res ? res.data : "username or password incorrect";
@@ -23,4 +28,4 @@ async function remove(payload) {
   return res ? res.data : "username or password incorrect";
 }
 
-export { getUser, update, remove };
+export { getUser, getUsers, update, remove };

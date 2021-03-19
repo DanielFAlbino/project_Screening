@@ -1,5 +1,5 @@
-import { React } from "react";
-
+import { React, useMemo, useState, useEffect } from "react";
+import _ from "lodash";
 import { makeStyles } from "@material-ui/core/styles";
 
 import {
@@ -11,13 +11,17 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Typography,
   IconButton,
   Tooltip,
   MenuItem,
 } from "@material-ui/core";
 import { Add, Delete, Edit } from "@material-ui/icons";
 import { Link } from "react-router-dom";
+import {
+  getAllCollection,
+  getCollectionByUser,
+} from "../../../../../Services/collection";
+import { getUser } from "../../../../../Services/user";
 
 const useStyles = makeStyles({
   table: {
@@ -31,14 +35,64 @@ const useStyles = makeStyles({
   cell: {
     width: "20%",
   },
+  linkColor: {
+    color: "black",
+  },
 });
 
 const onDelete = (id) => {
   console.log(id);
 };
 
-export default function CollectionTable({ data, titles, isAdmin }) {
+export default function CollectionTable({ titles, isAdmin, userId }) {
   const classes = useStyles();
+  const [collections, setCollections] = useState([]);
+  const [filter, setFilter] = useState("");
+  const debounceFilter = useMemo(() => _.debounce(setFilter, 500), [setFilter]);
+
+  const handleChange = (event) => {
+    const value = event.target.value;
+    setFilter(value);
+    debounceFilter(value);
+  };
+
+  const onGetCollection = async () => {
+    if (!isAdmin) titles.splice(1, 2, "Actions");
+    let data;
+    if (isAdmin) {
+      data = await getAllCollection().then((res) => {
+        return res.collections;
+      });
+    } else {
+      data = await getCollectionByUser(userId).then((res) => {
+        return res.collections;
+      });
+    }
+
+    data.map(async (row) => {
+      const user = await getUser(row.userId).then((res) => {
+        return res.username;
+      });
+      row.user = user;
+    });
+    if (filter) {
+      const collectionFilter = [];
+      data.filter((val) => {
+        if (
+          val.collectionName.includes(filter) ||
+          (val.user && val.user.includes(filter))
+        )
+          collectionFilter.push(val);
+      });
+      data = collectionFilter;
+    }
+
+    setCollections(data);
+  };
+
+  useEffect(() => {
+    onGetCollection();
+  }, [filter]);
 
   return (
     <TableContainer component={Paper}>
@@ -46,7 +100,7 @@ export default function CollectionTable({ data, titles, isAdmin }) {
         <TableHead>
           <TableRow key={11}>
             {!isAdmin ? (
-              <TableCell align="left" className={classes.cell}>
+              <TableCell align="center" className={classes.cell}>
                 <Link to={"/collection"}>
                   <Tooltip
                     title="Create collection"
@@ -57,30 +111,51 @@ export default function CollectionTable({ data, titles, isAdmin }) {
                 </Link>
               </TableCell>
             ) : (
-              <TableCell align="left" className={classes.cell}></TableCell>
+              <TableCell align="center" className={classes.cell}></TableCell>
             )}
-            <TableCell align="left">
+            <TableCell aalign="center" scope="row" colSpan={titles.length}>
               <TextField
                 className={classes.Input}
                 id="standard-basic"
                 label="Search by collection or user"
+                onChange={handleChange}
+                value={filter}
               />
             </TableCell>
           </TableRow>
           <TableRow key={10}>
             {titles.map((row) => (
-              <TableCell align="left">{row}</TableCell>
+              <TableCell
+                align="center"
+                colSpan={!isAdmin ? titles.length + 1 : 1}
+              >
+                {row}
+              </TableCell>
             ))}
           </TableRow>
         </TableHead>
         <TableBody>
-          {data.map((row) => (
-            <TableRow key={row[0]}>
-              <TableCell align="left">{row[1]}</TableCell>
-              <TableCell align="left">
-                <Link to={`profile/${row[0]}`}>{row[7]}</Link>
+          {collections.map((row) => (
+            <TableRow key={row._id}>
+              <TableCell
+                align="center"
+                colSpan={!isAdmin ? titles.length + 1 : 1}
+              >
+                {row.collectionName}
               </TableCell>
-              <TableCell align="left">
+              {isAdmin ? (
+                <TableCell component="th" align="center">
+                  <Link
+                    className={classes.linkColor}
+                    to={`profile/${row.userId}`}
+                  >
+                    {row.user}
+                  </Link>
+                </TableCell>
+              ) : (
+                <></>
+              )}
+              <TableCell align="center">
                 <MenuItem>
                   <IconButton
                     aria-label="account of current user"
@@ -88,7 +163,10 @@ export default function CollectionTable({ data, titles, isAdmin }) {
                     aria-haspopup="true"
                     color="inherit"
                   >
-                    <Link to={`collection/${row[0]}`}>
+                    <Link
+                      className={classes.linkColor}
+                      to={`collection/${row._id}`}
+                    >
                       <Edit />
                     </Link>
                   </IconButton>
@@ -96,7 +174,7 @@ export default function CollectionTable({ data, titles, isAdmin }) {
                     aria-label="account of current user"
                     aria-controls="menu-appbar"
                     aria-haspopup="true"
-                    onClick={() => onDelete(row[0])}
+                    onClick={() => onDelete(row._id)}
                     color="inherit"
                   >
                     <Delete />

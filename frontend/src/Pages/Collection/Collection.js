@@ -4,8 +4,6 @@ import { getCollection } from "../../Services/collection";
 import { useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import { TextField, Button } from "@material-ui/core";
-import { Link } from "react-router-dom";
-import AddIcon from "@material-ui/icons/Add";
 import Table from "./components/Table/Table";
 import Navbar from "../../Components/NavBar/NavBar";
 const useStyles = makeStyles((theme) => ({
@@ -87,7 +85,7 @@ function Collection(props) {
           value={formData.collectionName}
         />
       </Grid>
-      <Grid>
+      <Grid container lg={10}>
         <Table cards={collections.cardsList} setCardsLis={formData} />
       </Grid>
       <Grid>

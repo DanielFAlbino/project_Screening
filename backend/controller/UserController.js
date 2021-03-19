@@ -14,6 +14,21 @@ exports.get = async (req, res) => {
   }
 };
 
+exports.getAll = async (req, res) => {
+  if (!req._user.isAdmin) {
+    return res.status(401).json({ message: "You don't have permition" });
+  }
+  try {
+    const users = await UserModel.find({}, { _id: 1, name: 1, username: 1 });
+    if (!users) {
+      return res.status(404).json({ message: "Users not found!" });
+    }
+    return res.status(200).json(users);
+  } catch (err) {
+    throw err;
+  }
+};
+
 exports.update = async (req, res) => {
   if (!req._user.isAdmin) {
     return res.status(401).json({ message: "You don't have permition" });
@@ -41,7 +56,7 @@ exports.delete = async (req, res) => {
   const _id = req.params.userId;
   await UserModel.findByIdAndRemove({ _id })
     .then(() => {
-      return res.status(200).json("User was deleted!");
+      return res.status(200).json({ message: "User was deleted!" });
     })
     .catch((error) => {
       return res.status(400).json(error);

@@ -1,9 +1,10 @@
 // Base
 import { React, useEffect } from "react";
-import { Redirect, useLocation } from "react-router-dom";
+import { Redirect } from "react-router-dom";
 
 //routes
 import Routes from "./routes/routes";
+import PrivateRoute from "./routes/PrivateRoute";
 
 import { getUserId } from "./Utils/localStorage";
 
@@ -19,9 +20,13 @@ function App() {
     if (!user && location !== "/login") {
       return <Redirect to="/login" />;
     }
-  }, []);
+  }, [location, user]);
 
-  return <Routes />;
+  return (
+    <PrivateRoute>
+      <Routes />
+    </PrivateRoute>
+  );
 }
 
 export default App;

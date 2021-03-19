@@ -38,9 +38,15 @@ const routesConfig = [
     exact: true,
     component: lazy(() => import("../Pages/NewUser/NewUser")),
   },
-  /* {
+  {
+    path: "/users",
+    exact: true,
+    component: lazy(() => import("../Pages/Users/Users")),
+  },
+  {
+    path: "/*",
     component: lazy(() => import("../Pages/NoMatchPage/NoMatchPage")),
-  }, */
+  },
 ]; //end routes
 
 const renderRoutes = (routes) => {

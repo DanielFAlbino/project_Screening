@@ -5,8 +5,14 @@ import {
   Typography,
   IconButton,
   MenuItem,
+  Tooltip,
 } from "@material-ui/core";
-import { ExitToApp, AccountCircle } from "@material-ui/icons";
+import {
+  ExitToApp,
+  AccountCircle,
+  People,
+  Dashboard,
+} from "@material-ui/icons";
 import { removeUser, removeToken } from "../../Utils/localStorage";
 import { getUserId } from "../../Utils/localStorage";
 import { makeStyles } from "@material-ui/core/styles";
@@ -21,11 +27,15 @@ const useStyles = makeStyles((theme) => ({
   title: {
     flexGrow: 1,
   },
+  linkColor: {
+    color: "white",
+  },
 }));
 
 function NavBar() {
   const user = getUserId();
   const classes = useStyles();
+
   const handleLogout = () => {
     removeUser();
     removeToken();
@@ -42,15 +52,48 @@ function NavBar() {
 
         {user ? (
           <MenuItem>
+            {JSON.parse(user).isAdmin ? (
+              <IconButton
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                color="inherit"
+              >
+                <Link className={classes.linkColor} to={`/users`}>
+                  <Tooltip title="Users list" aria-label="users list">
+                    <People />
+                  </Tooltip>
+                </Link>
+              </IconButton>
+            ) : (
+              <></>
+            )}
+
             <IconButton
               aria-label="account of current user"
               aria-controls="menu-appbar"
               aria-haspopup="true"
               color="inherit"
             >
-              <Link to={`/profile/${JSON.parse(user)._id}`}>
-                {" "}
-                <AccountCircle />
+              <Link className={classes.linkColor} to={`/dashboard`}>
+                <Tooltip title="Dashboard" aria-label="dashboard">
+                  <Dashboard />
+                </Tooltip>
+              </Link>
+            </IconButton>
+            <IconButton
+              aria-label="account of current user"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
+              color="inherit"
+            >
+              <Link
+                className={classes.linkColor}
+                to={`/profile/${JSON.parse(user)._id}`}
+              >
+                <Tooltip title="Profile" aria-label="profile">
+                  <AccountCircle />
+                </Tooltip>
               </Link>
             </IconButton>
             <IconButton
@@ -60,7 +103,9 @@ function NavBar() {
               onClick={handleLogout}
               color="inherit"
             >
-              <ExitToApp />
+              <Tooltip title="Logout" aria-label="logout">
+                <ExitToApp />
+              </Tooltip>
             </IconButton>
           </MenuItem>
         ) : (

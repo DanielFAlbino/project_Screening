@@ -1,24 +1,24 @@
 import React from "react";
-import { Route, Redirect } from "react-router-dom";
-import { getUser } from "../Utils/localStorage";
-import AppBar from "Components/AppBar/AppBar";
+import { BrowserRouter as Router, Route, Redirect } from "react-router-dom";
+import { getUserId } from "../Utils/localStorage";
+/* import AppBar from "Components/AppBar/AppBar"; */
 
 const PrivateRoute = ({ component: Component, role, ...rest }) => {
-  const user = getUser();
+  const user = getUserId();
 
   return (
-    <Route
-      {...rest}
-      render={(props) => {
-        return Boolean(user) ? (
-          <AppBar>
+    <Router>
+      <Route
+        {...rest}
+        render={(props) => {
+          return user ? (
             <Component {...props} />
-          </AppBar>
-        ) : (
-          <Redirect to={{ pathname: "/login" }} />
-        );
-      }}
-    />
+          ) : (
+            <Redirect to={{ pathname: "/login" }} />
+          );
+        }}
+      />
+    </Router>
   );
 };
 export default PrivateRoute;

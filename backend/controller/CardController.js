@@ -4,7 +4,7 @@ exports.getCardsByUser = async (req, res) => {
   try {
     const cards = await CardModel.find({
       userId: req.params.userId,
-    });
+    }).select("+cardNumber");
     if (!cards) {
       return res.status(404).json({ message: "Cards not found!" });
     }
@@ -18,7 +18,7 @@ exports.getCardById = async (req, res) => {
   try {
     const card = await CardModel.findOne({
       _id: req.params.cardId,
-    });
+    }).select("+cardNumber");
     if (!card) {
       return res.status(404).json({ message: "Card not found!" });
     }
@@ -33,7 +33,7 @@ exports.getAllCards = async (req, res) => {
     return res.status(401).json({ message: "You don't have permission" });
   }
   try {
-    const cards = await CardModel.find();
+    const cards = await CardModel.find().select("+cardNumber");
     if (!cards) {
       return res.status(404).json({ message: "No cards were found!" });
     }
@@ -50,7 +50,7 @@ exports.add = async (req, res) => {
 
   const card = await CardModel.findOne({
     cardNumber: req.body.cardNumber,
-  });
+  }).select("+cardNumber");
   if (!card) {
     let cards = req.body;
     cards.userId = req._user._id;
