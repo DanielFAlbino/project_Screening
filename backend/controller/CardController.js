@@ -50,20 +50,22 @@ exports.add = async (req, res) => {
 
   const card = await CardModel.findOne({
     cardNumber: req.body.cardNumber,
-  }).select("+cardNumber");
+  });
+
   if (!card) {
     let cards = req.body;
     cards.userId = req._user._id;
 
     await CardModel.create(cards)
-      .then((result) => {
-        return res.status(200).json(result);
+      .then(() => {
+        return res.status(200).json({ message: "Success!" });
       })
       .catch((error) => {
         return res.status(400).json({ error: error });
       });
   }
-  return res.status(409).json({ message: "That card already exists" });
+
+  return res.status(409).json({ message: "Card or Number already exists!" });
 };
 
 exports.update = async (req, res) => {
@@ -85,17 +87,9 @@ exports.update = async (req, res) => {
 
 exports.delete = async (req, res) => {
   const _id = req.params.cardId;
-  const card = await CardModel.findOne({
-    _Id: _id,
+  await CardModel.deleteOne({ _id }).then((result) => {
+    if (result.deleteCount > 0)
+      return res.status(200).json({ message: "Card deleted!" });
+    return res.status(404).json({ message: "Card not found!" });
   });
-  console.log(card);
-  if (card) {
-    await CardModel.findByIdAndRemove({ _id })
-      .then(() => {
-        return res.status(200).json({ message: "Card deleted!" });
-      })
-      .catch((error) => {
-        return res.status(400).json({ error: error });
-      });
-  }
 };

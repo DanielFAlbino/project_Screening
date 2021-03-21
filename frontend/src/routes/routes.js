@@ -9,7 +9,7 @@ const routesConfig = [
     component: lazy(() => import("../Pages/Login/Login")),
   },
   {
-    path: "/dashboard",
+    path: "/",
     exact: true,
     component: lazy(() => import("../Pages/Dashboard/Dashboard")),
   },

@@ -7,6 +7,12 @@ const config = {
     Authorization: "Bearer " + getToken(),
   },
 };
+
+async function register(payload) {
+  const res = await axios.post(URL + "/collection/add", payload, config);
+  return res ? res.data : "card not found!";
+}
+
 async function getCollection(collectionId) {
   const res = await axios.get(URL + "/collection/" + collectionId, config);
   return res ? res.data : "card not found!";
@@ -21,20 +27,28 @@ async function getAllCollection() {
   return res ? res.data : "card not found!";
 }
 
-async function updateCollection(payload) {
-  const res = await axios.post(URL + "/collection/update/", payload);
+async function update(collectionId, payload) {
+  const res = await axios.put(
+    URL + "/collection/update/" + collectionId,
+    payload,
+    config
+  );
   return res ? res.data : "card not found!";
 }
 
-async function removeCollection(payload) {
-  const res = await axios.delete(URL + "/collection/delete/", payload);
+async function remove(collectionId) {
+  const res = await axios.delete(
+    URL + "/collection/delete/" + collectionId,
+    config
+  );
   return res ? res.data : "card not found!";
 }
 
 export {
+  register,
   getCollectionByUser,
   getCollection,
-  updateCollection,
-  removeCollection,
+  update,
+  remove,
   getAllCollection,
 };

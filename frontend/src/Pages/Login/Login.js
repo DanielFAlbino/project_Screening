@@ -48,7 +48,7 @@ function Login() {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const history = useHistory();
-  const goTo = useCallback(() => history.push("/dashboard"), [history]);
+  const goTo = useCallback(() => history.push("/"), [history]);
 
   const handleChange = (name) => (event) => {
     setFormData({

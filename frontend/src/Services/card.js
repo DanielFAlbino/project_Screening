@@ -13,6 +13,11 @@ async function getCards(userId) {
   return res ? res.data : "card not found!";
 }
 
+async function register(payload) {
+  const res = await axios.post(URL + "/api/card/card/", payload, config);
+  return res ? res.data : "card not found!";
+}
+
 async function getCard(cardId) {
   const res = await axios.get(URL + "/api/card/" + cardId, config);
   return res ? res.data : "card not found!";
@@ -32,9 +37,9 @@ async function update(userId, payload) {
   return res ? res.data : "card not found!";
 }
 
-async function remove(payload) {
-  const res = await axios.delete(URL + "/api/card/delete/", payload);
+async function remove(cardId) {
+  const res = await axios.delete(URL + "/api/card/delete/" + cardId, config);
   return res ? res.data : "card not found!";
 }
 
-export { update, remove, getAllCards, getCards, getCard };
+export { register, update, remove, getAllCards, getCards, getCard };

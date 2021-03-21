@@ -1,4 +1,5 @@
 const UserModel = require("../models/UserModel");
+const bcrypt = require("bcryptjs");
 
 exports.get = async (req, res) => {
   try {
@@ -33,13 +34,26 @@ exports.update = async (req, res) => {
   if (!req._user.isAdmin) {
     return res.status(401).json({ message: "You don't have permition" });
   }
+  const user = await UserModel.findOne({
+    _id: req.params.userId,
+  });
+  if (!user) {
+    return res.status(404).json({ message: "User not found!" });
+  }
+
   const _id = req.params.userId;
   const userParams = {
     username: req.body.username,
     name: req.body.name,
-    password: req.body.password,
     isAdmin: req.body.isAdmin,
   };
+
+  if (req.body.password) {
+    bcrypt.hash(req.body.password, 10).then(async (hash) => {
+      await UserModel.updateOne({ _id }, { $set: { password: hash } });
+    });
+  }
+
   await UserModel.updateOne({ _id }, { $set: userParams })
     .then(() => {
       return res.status(200).json({ message: "User was updated!" });

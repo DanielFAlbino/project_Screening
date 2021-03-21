@@ -75,7 +75,7 @@ function NavBar() {
               aria-haspopup="true"
               color="inherit"
             >
-              <Link className={classes.linkColor} to={`/dashboard`}>
+              <Link className={classes.linkColor} to={`/`}>
                 <Tooltip title="Dashboard" aria-label="dashboard">
                   <Dashboard />
                 </Tooltip>

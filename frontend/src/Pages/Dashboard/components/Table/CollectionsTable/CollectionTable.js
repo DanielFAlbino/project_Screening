@@ -20,6 +20,7 @@ import { Link } from "react-router-dom";
 import {
   getAllCollection,
   getCollectionByUser,
+  remove,
 } from "../../../../../Services/collection";
 import { getUser } from "../../../../../Services/user";
 
@@ -40,13 +41,15 @@ const useStyles = makeStyles({
   },
 });
 
-const onDelete = (id) => {
-  console.log(id);
-};
-
-export default function CollectionTable({ titles, isAdmin, userId }) {
+export default function CollectionTable({
+  titles,
+  isAdmin,
+  userId,
+  getCollections,
+}) {
   const classes = useStyles();
   const [collections, setCollections] = useState([]);
+  const [message, setMessage] = useState("");
   const [filter, setFilter] = useState("");
   const debounceFilter = useMemo(() => _.debounce(setFilter, 500), [setFilter]);
 
@@ -86,13 +89,25 @@ export default function CollectionTable({ titles, isAdmin, userId }) {
       });
       data = collectionFilter;
     }
-
+    getCollections(data);
     setCollections(data);
+  };
+
+  const onDelete = (id, name) => async (e) => {
+    e.preventDefault();
+    const res = window.confirm(`You are about to remove '${name}', continue?`);
+    if (res) {
+      const message = await remove(id).then((res) => {
+        return res.message;
+      });
+      setMessage(message);
+      return;
+    }
   };
 
   useEffect(() => {
     onGetCollection();
-  }, [filter]);
+  }, [filter, message, collections]);
 
   return (
     <TableContainer component={Paper}>
@@ -174,7 +189,7 @@ export default function CollectionTable({ titles, isAdmin, userId }) {
                     aria-label="account of current user"
                     aria-controls="menu-appbar"
                     aria-haspopup="true"
-                    onClick={() => onDelete(row._id)}
+                    onClick={onDelete(row._id, row.collectionName)}
                     color="inherit"
                   >
                     <Delete />

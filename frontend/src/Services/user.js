@@ -18,8 +18,12 @@ async function getUsers() {
   return res ? res.data : "username or password incorrect";
 }
 
-async function update(payload) {
-  const res = await axios.post(URL + "/api/user/update/", payload);
+async function update(userId, payload) {
+  const res = await axios.put(
+    URL + "/api/user/update/" + userId,
+    payload,
+    config
+  );
   return res ? res.data : "username or password incorrect";
 }
 

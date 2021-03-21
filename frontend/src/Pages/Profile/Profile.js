@@ -1,11 +1,18 @@
 import { React, useState, useCallback, useEffect } from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
-import Grid from "@material-ui/core/Grid";
-import TextField from "@material-ui/core/TextField";
-import Button from "@material-ui/core/Button";
+import {
+  Grid,
+  Checkbox,
+  TextField,
+  Button,
+  FormControlLabel,
+} from "@material-ui/core";
 
+import { getUserId } from "../../Utils/localStorage";
 import { update, getUser } from "../../Services/user";
+import Navbar from "../../Components/NavBar/NavBar";
+
 import { useHistory } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
@@ -37,41 +44,50 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function Profile(props) {
+  const isAdmin = JSON.parse(getUserId()).isAdmin;
+  const userId = JSON.parse(getUserId())._id;
   const user = props.match.params.userId;
   const classes = useStyles();
   const [formData, setFormData] = useState({
     username: "",
     name: "",
     password: "",
+    isAdmin: false,
   });
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const history = useHistory();
-  const goBack = useCallback(() => history.push("/dashboard"), [history]);
+  const goBack = useCallback(() => history.push("/"), [history]);
 
   const handleChange = (name) => (event) => {
     setFormData({
       ...formData,
-      [name]: event.target.value,
+      [name]: event.target.value || event.target.checked,
     });
   };
 
   const handleGetUser = async () => {
+    setIsSubmitting(true);
+    if (!isAdmin && userId !== user) {
+      goBack();
+      return;
+    }
     const data = await getUser(user).then((res) => {
       return res;
     });
     const arr = {
       username: data.username,
       name: data.name,
-      password: data.password,
     };
+    setIsSubmitting(false);
     setFormData(arr);
   };
 
   const handleSubmit = (formData) => async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-
+    console.log(formData);
     await update(formData).then((res) => {
       setIsSubmitting(false);
       if (res) {
@@ -94,6 +110,7 @@ function Profile(props) {
       alignItems="center"
       alignContent="center"
     >
+      <Navbar />
       <form
         className={classes.root}
         noValidate
@@ -105,6 +122,7 @@ function Profile(props) {
             name="username"
             label="username *"
             type="text"
+            disabled={isSubmitting}
             variant="outlined"
             className={classes.tf}
             onChange={handleChange("username")}
@@ -116,6 +134,7 @@ function Profile(props) {
             name="name"
             label="name *"
             type="text"
+            disabled={isSubmitting}
             variant="outlined"
             className={classes.tf}
             onChange={handleChange("name")}
@@ -125,13 +144,30 @@ function Profile(props) {
         <Grid container lg={12}>
           <TextField
             name="password"
-            label="password *"
+            label="New password "
             type="password"
             variant="outlined"
+            disabled={isSubmitting}
             className={classes.tf}
             value={formData.password}
             onChange={handleChange("password")}
           />
+        </Grid>
+        <Grid>
+          {isAdmin ? (
+            <FormControlLabel
+              control={
+                <Checkbox
+                  onChange={handleChange("isAdmin")}
+                  name="checkedB"
+                  color="primary"
+                />
+              }
+              label="Admin"
+            />
+          ) : (
+            <></>
+          )}
         </Grid>
         <Grid>
           <Button

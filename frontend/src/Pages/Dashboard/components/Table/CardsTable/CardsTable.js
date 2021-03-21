@@ -1,7 +1,9 @@
 import { React, useState, useMemo, useEffect } from "react";
+import { Link } from "react-router-dom";
 import _ from "lodash";
 import { makeStyles } from "@material-ui/core/styles";
 import {
+  Grid,
   Paper,
   Table,
   TableBody,
@@ -15,10 +17,10 @@ import {
   Typography,
   MenuItem,
 } from "@material-ui/core";
-import { getAllCards, getCards } from "../../../../../Services/card";
+import { Add, Delete, Edit, Close } from "@material-ui/icons";
+import { getAllCards, getCards, remove } from "../../../../../Services/card";
 import { getUser } from "../../../../../Services/user";
-import { Add, Delete, Edit } from "@material-ui/icons";
-import { Link } from "react-router-dom";
+import Select from "./components/Select/Select";
 
 const useStyles = makeStyles({
   table: {
@@ -42,11 +44,14 @@ const useStyles = makeStyles({
   },
 });
 
-export default function CardsTable({ titles, isAdmin, userId }) {
+export default function CardsTable({ isAdmin, userId, collections }) {
   const classes = useStyles();
   const [cards, setCards] = useState([]);
+  const [message, setMessage] = useState("");
   const [filter, setFilter] = useState("");
+  const [addToCollection, setAddToCollection] = useState(false);
   const debounceFilter = useMemo(() => _.debounce(setFilter, 500), [setFilter]);
+  const cardHeader = ["#", "Name", "Description", "Added by", "Actions"];
 
   const handleChange = (event) => {
     const value = event.target.value;
@@ -55,7 +60,10 @@ export default function CardsTable({ titles, isAdmin, userId }) {
   };
 
   const onGetCards = async () => {
-    if (!isAdmin) titles.splice(3, 2, "Actions");
+    if (!isAdmin) {
+      cardHeader.splice(3, 2, "Actions");
+    }
+
     let data;
     if (isAdmin) {
       data = await getAllCards().then((res) => {
@@ -85,17 +93,21 @@ export default function CardsTable({ titles, isAdmin, userId }) {
     setCards(data);
   };
 
-  useEffect(() => {
-    onGetCards();
-  }, [filter]);
-
-  const onDelete = (id, name) => {
+  const onDelete = (id, name) => async (e) => {
+    e.preventDefault();
     const res = window.confirm(`You are about to remove '${name}', continue?`);
     if (res) {
-      console.log("deleted!" + id);
-      setCards([]);
+      const message = await remove(id).then((res) => {
+        return res.message;
+      });
+      setMessage(message);
+      return;
     }
   };
+
+  useEffect(() => {
+    onGetCards();
+  }, [filter, message, cards]);
 
   return (
     <TableContainer component={Paper}>
@@ -113,7 +125,7 @@ export default function CardsTable({ titles, isAdmin, userId }) {
             ) : (
               <TableCell align="left" className={classes.cell}></TableCell>
             )}
-            <TableCell align="left" scope="row" colSpan={titles.length}>
+            <TableCell align="left" scope="row" colSpan={cardHeader.length}>
               <TextField
                 className={classes.Small}
                 colSpan={!isAdmin ? 1 : 3}
@@ -129,7 +141,7 @@ export default function CardsTable({ titles, isAdmin, userId }) {
             </TableCell>
           </TableRow>
           <TableRow key={11}>
-            {titles.map((row) => (
+            {cardHeader.map((row) => (
               <TableCell align="center">{row}</TableCell>
             ))}
           </TableRow>
@@ -137,7 +149,7 @@ export default function CardsTable({ titles, isAdmin, userId }) {
         <TableBody>
           {!cards.length ? (
             <TableRow>
-              <TableCell component="th" scope="row" colSpan={titles.length}>
+              <TableCell component="th" scope="row" colSpan={cardHeader.length}>
                 <Typography variant="h6" component="h6" align="center">
                   No data to show
                 </Typography>
@@ -170,28 +182,54 @@ export default function CardsTable({ titles, isAdmin, userId }) {
                 )}
                 <TableCell align="center">
                   <MenuItem>
-                    <IconButton
-                      aria-label="account of current user"
-                      aria-controls="menu-appbar"
-                      aria-haspopup="true"
-                      color="inherit"
-                    >
-                      <Link
-                        className={classes.linkColor}
-                        to={`card/${row._id}`}
-                      >
-                        <Edit />
-                      </Link>
-                    </IconButton>
-                    <IconButton
-                      aria-label="account of current user"
-                      aria-controls="menu-appbar"
-                      aria-haspopup="true"
-                      onClick={() => onDelete(row._id, row.name)}
-                      color="inherit"
-                    >
-                      <Delete />
-                    </IconButton>
+                    {addToCollection ? (
+                      <Grid>
+                        <IconButton
+                          aria-label="account of current user"
+                          aria-controls="menu-appbar"
+                          aria-haspopup="true"
+                          onClick={() => setAddToCollection(false)}
+                          color="inherit"
+                        >
+                          <Close />
+                        </IconButton>
+                        <Select collectionList={collections} card={row}  addedToCollection={setAddToCollection}/>
+                      </Grid>
+                    ) : (
+                      <Grid>
+                        <IconButton
+                          aria-label="account of current user"
+                          aria-controls="menu-appbar"
+                          aria-haspopup="true"
+                          onClick={() => setAddToCollection(true)}
+                          color="inherit"
+                        >
+                          <Add />
+                        </IconButton>
+                        <IconButton
+                          aria-label="account of current user"
+                          aria-controls="menu-appbar"
+                          aria-haspopup="true"
+                          color="inherit"
+                        >
+                          <Link
+                            className={classes.linkColor}
+                            to={`card/${row._id}`}
+                          >
+                            <Edit />
+                          </Link>
+                        </IconButton>
+                        <IconButton
+                          aria-label="account of current user"
+                          aria-controls="menu-appbar"
+                          aria-haspopup="true"
+                          onClick={onDelete(row._id, row.name)}
+                          color="inherit"
+                        >
+                          <Delete />
+                        </IconButton>
+                      </Grid>
+                    )}
                   </MenuItem>
                 </TableCell>
               </TableRow>

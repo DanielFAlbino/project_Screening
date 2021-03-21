@@ -2,10 +2,15 @@ import { React, useState, useCallback, useEffect } from "react";
 
 //components
 import Grid from "@material-ui/core/Grid";
-import { TextField, TextareaAutosize, Button } from "@material-ui/core";
+import {
+  TextField,
+  TextareaAutosize,
+  Button,
+  Typography,
+} from "@material-ui/core";
 import Navbar from "../../Components/NavBar/NavBar";
 import { useHistory } from "react-router-dom";
-import { getCard, update } from "../../Services/card";
+import { getCard, update, register } from "../../Services/card";
 import { getUserId } from "../../Utils/localStorage";
 import AlertMessage from "../../Components/Alerts/Alerts";
 //style
@@ -36,6 +41,7 @@ function Card(props) {
   const classes = useStyles();
   var Message;
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState("");
   const [formData, setFormData] = useState({
     cardNumber: 0,
     name: "",
@@ -45,6 +51,7 @@ function Card(props) {
   const goBack = useCallback(() => history.push("/dashboard"), [history]);
 
   const handleChange = (name) => (event) => {
+    setMessage("");
     setFormData({
       ...formData,
       [name]: event.target.value,
@@ -67,17 +74,35 @@ function Card(props) {
     const user = JSON.parse(getUserId());
     let message;
     formData.userId = user._id;
+
+    if (
+      !formData.name.trim() ||
+      !formData.description.trim() ||
+      formData.cardNumber == 0
+    ) {
+      setIsSubmitting(false);
+      return setMessage("All fields are required");
+    }
     if (card) {
       message = await update(formData._id, formData).then((res) => {
         return res.message;
       });
-      console.log(message);
+
+      setIsSubmitting(false);
+      setMessage(message);
+      return;
     }
+
+    message = await register(formData).then((res) => {
+      return res.message;
+    });
+
+    setMessage(message);
     setIsSubmitting(false);
   };
 
   useEffect(() => {
-    handelGetCard();
+    if (card) handelGetCard();
   }, []);
 
   return (
@@ -132,9 +157,16 @@ function Card(props) {
             color="inherit"
             onClick={goBack}
           >
-            Cancel
+            Close
           </Button>
         </Grid>
+        {message ? (
+          <Typography color="error" variant="overline" display="inline">
+            {message}
+          </Typography>
+        ) : (
+          <Typography></Typography>
+        )}
       </form>
     </Grid>
   );

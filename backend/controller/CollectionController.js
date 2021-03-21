@@ -55,7 +55,7 @@ exports.update = async (req, res) => {
 
   await CollectionModel.updateOne({ _id }, { $set: collectionParams })
     .then(() => {
-      return res.status(200).json("Collection was updated!");
+      return res.status(200).json({ message: "Collection was updated!" });
     })
     .catch((error) => {
       return res.status(400).json(error);
@@ -69,10 +69,12 @@ exports.add = async (req, res) => {
   let data = req.body;
   data.userId = req._user._id;
   await CollectionModel.create(data)
-    .then((result) => {
-      return res.status(200).json(result);
+    .then(() => {
+      return res.status(200).json({ message: "Success!" });
     })
-    .catch((error) => console.error(error));
+    .catch((error) => {
+      return res.status(400).json({ error: error });
+    });
 };
 
 exports.delete = async (req, res) => {
