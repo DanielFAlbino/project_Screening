@@ -13,29 +13,69 @@ import {
   MenuItem,
 } from "@material-ui/core/";
 import { Delete } from "@material-ui/icons";
+
+import { getCollection, update } from "../../../../Services/collection";
+import { getCard } from "../../../../Services/card";
+
 const useStyles = makeStyles({
   table: {
     minWidth: "100vh",
   },
 });
 
-export default function TableData({ cards, setCardsLis }) {
+export default function TableData({ collectionId }) {
   const classes = useStyles();
   const [card, setCard] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(true);
+
   const titles = ["#", "Name", "Description", "Actions"];
 
-  const onDelete = (id, name) => async (e) => {
-    console.log("here");
+  const handleCards = async () => {
+    let cardsList = [];
+    const data = await getCollection(collectionId).then((res) => {
+      return res.collections.cardsList;
+    });
+    if (data && data.length > 0) {
+      data.map(async (card) => {
+        let cardId = card._id;
+        await getCard(cardId).then((res) => {
+          cardsList.push(res.card);
+        });
+      });
+      setIsSubmitting(false);
+      setCard(cardsList);
+      return;
+    } else {
+      setCard(null);
+      setIsSubmitting(false);
+    }
+  };
+
+  const onDelete = async (index, id, name) => {
+    const res = window.confirm(
+      "You are about to remove the Card " +
+        name +
+        " from your collection, continue?"
+    );
+    if (res) {
+      console.log("here");
+      const data = card;
+      data.splice(index, 1);
+      console.log(data);
+      setCard(data);
+      const collection = {
+        cardsList: data,
+      };
+
+      const message = await update(id, collection).then((res) => {
+        return res.message;
+      });
+      alert(message);
+    }
   };
 
   useEffect(() => {
-    let data = [];
-    if (cards) {
-      cards.map((arr) => {
-        data.push(arr);
-      });
-      setCard(data);
-    }
+    handleCards();
   }, []);
 
   return (
@@ -50,9 +90,9 @@ export default function TableData({ cards, setCardsLis }) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {cards ? (
-              card.map((row) => (
-                <TableRow key={row._id}>
+            {card ? (
+              card.map((row, index) => (
+                <TableRow key={index}>
                   <TableCell component="th" scope="row">
                     {row.cardNumber}
                   </TableCell>
@@ -68,7 +108,9 @@ export default function TableData({ cards, setCardsLis }) {
                         aria-label="account of current user"
                         aria-controls="menu-appbar"
                         aria-haspopup="true"
-                        onClick={onDelete(row._id, row.collectionName)}
+                        onClick={() =>
+                          onDelete(index, row._id, row.collectionName)
+                        }
                         color="inherit"
                       >
                         <Delete />
@@ -79,7 +121,7 @@ export default function TableData({ cards, setCardsLis }) {
               ))
             ) : (
               <TableRow>
-                <TableCell component="th" scope="row" colSpan={3}>
+                <TableCell component="th" scope="row" colSpan={4}>
                   <Typography variant="h6" component="h6" align="center">
                     No data to show
                   </Typography>

@@ -27,8 +27,8 @@ async function update(userId, payload) {
   return res ? res.data : "username or password incorrect";
 }
 
-async function remove(payload) {
-  const res = await axios.delete(URL + "/api/user/delete/", payload);
+async function remove(userId) {
+  const res = await axios.delete(URL + "/api/user/delete/" + userId, config);
   return res ? res.data : "username or password incorrect";
 }
 

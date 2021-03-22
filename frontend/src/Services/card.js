@@ -8,13 +8,13 @@ const config = {
   },
 };
 
-async function getCards(userId) {
-  const res = await axios.get(URL + "/api/card/user/" + userId, config);
+async function register(payload) {
+  const res = await axios.post(URL + "/api/card/card/", payload, config);
   return res ? res.data : "card not found!";
 }
 
-async function register(payload) {
-  const res = await axios.post(URL + "/api/card/card/", payload, config);
+async function getCards(userId) {
+  const res = await axios.get(URL + "/api/card/user/" + userId, config);
   return res ? res.data : "card not found!";
 }
 

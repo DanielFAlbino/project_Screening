@@ -12,7 +12,6 @@ import Navbar from "../../Components/NavBar/NavBar";
 import { useHistory } from "react-router-dom";
 import { getCard, update, register } from "../../Services/card";
 import { getUserId } from "../../Utils/localStorage";
-import AlertMessage from "../../Components/Alerts/Alerts";
 //style
 import { makeStyles } from "@material-ui/core/styles";
 
@@ -39,7 +38,6 @@ const useStyles = makeStyles((theme) => ({
 function Card(props) {
   const card = props.match.params.cardId;
   const classes = useStyles();
-  var Message;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [formData, setFormData] = useState({
@@ -48,7 +46,7 @@ function Card(props) {
     description: "",
   });
   const history = useHistory();
-  const goBack = useCallback(() => history.push("/dashboard"), [history]);
+  const goBack = useCallback(() => history.push("/"), [history]);
 
   const handleChange = (name) => (event) => {
     setMessage("");
@@ -78,7 +76,7 @@ function Card(props) {
     if (
       !formData.name.trim() ||
       !formData.description.trim() ||
-      formData.cardNumber == 0
+      formData.cardNumber === 0
     ) {
       setIsSubmitting(false);
       return setMessage("All fields are required");
@@ -103,7 +101,7 @@ function Card(props) {
 
   useEffect(() => {
     if (card) handelGetCard();
-  }, []);
+  }, [card]);
 
   return (
     <Grid container direction="row" justify="center" alignItems="center">

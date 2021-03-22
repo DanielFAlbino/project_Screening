@@ -25,21 +25,18 @@ function Dashboard() {
   const user = getUserId();
   const [collection, setCollection] = useState([]);
 
-  const collectionHeader = ["Collection", "User", "Actions"];
-
   return (
     <Grid container direction="row" justify="center" alignItems="center">
       <Navbar />
       <Grid container direction="row" justify="center">
-        <Grid container xs={4} className={classes.table}>
+        <Grid item xs={12} lg={4} className={classes.table}>
           <CollectionsTable
             isAdmin={JSON.parse(user).isAdmin}
-            titles={collectionHeader}
             userId={JSON.parse(user)._id}
             getCollections={setCollection}
           />
         </Grid>
-        <Grid container xs={6} className={classes.table}>
+        <Grid item xs={12} lg={6} className={classes.table}>
           <CardsTable
             isAdmin={JSON.parse(user).isAdmin}
             userId={JSON.parse(user)._id}

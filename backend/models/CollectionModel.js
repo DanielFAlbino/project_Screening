@@ -6,7 +6,7 @@ const collectionDataSchema = new Schema(
   {
     userId: { type: String, required: true, unique: false },
     collectionName: { type: String, required: true, unique: false },
-    cardsList: [{ name: String, cardNumber: Number, description: String }],
+    cardsList: [{ _id: String }],
   },
   {
     collection: "collections",

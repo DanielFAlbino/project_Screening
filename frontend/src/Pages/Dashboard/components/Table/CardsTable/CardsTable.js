@@ -51,7 +51,9 @@ export default function CardsTable({ isAdmin, userId, collections }) {
   const [filter, setFilter] = useState("");
   const [addToCollection, setAddToCollection] = useState(false);
   const debounceFilter = useMemo(() => _.debounce(setFilter, 500), [setFilter]);
-  const cardHeader = ["#", "Name", "Description", "Added by", "Actions"];
+  const cardHeader = isAdmin
+    ? ["#", "Name", "Description", "Added by", "Actions"]
+    : ["#", "Name", "Description", "Actions"];
 
   const handleChange = (event) => {
     const value = event.target.value;
@@ -60,10 +62,6 @@ export default function CardsTable({ isAdmin, userId, collections }) {
   };
 
   const onGetCards = async () => {
-    if (!isAdmin) {
-      cardHeader.splice(3, 2, "Actions");
-    }
-
     let data;
     if (isAdmin) {
       data = await getAllCards().then((res) => {
@@ -76,10 +74,9 @@ export default function CardsTable({ isAdmin, userId, collections }) {
     }
 
     data.map(async (row) => {
-      const user = await getUser(row.userId).then((res) => {
-        return res.username;
+      await getUser(row.userId).then((res) => {
+        row.username = res.username;
       });
-      row.user = user;
     });
 
     if (filter) {
@@ -115,7 +112,7 @@ export default function CardsTable({ isAdmin, userId, collections }) {
         <TableHead>
           <TableRow key={10}>
             {!isAdmin ? (
-              <TableCell align="left" className={classes.cell}>
+              <TableCell align="center" className={classes.cell}>
                 <Link to={"/card"}>
                   <Tooltip title="Add card" aria-label="add card">
                     <Add />
@@ -158,7 +155,6 @@ export default function CardsTable({ isAdmin, userId, collections }) {
           ) : (
             cards.map((row) => (
               <TableRow key={row._id}>
-                {" "}
                 <TableCell component="th" align="center">
                   {row.cardNumber}
                 </TableCell>
@@ -174,7 +170,7 @@ export default function CardsTable({ isAdmin, userId, collections }) {
                       className={classes.linkColor}
                       to={`profile/${row.userId}`}
                     >
-                      {row.user}
+                      {row.username}
                     </Link>
                   </TableCell>
                 ) : (
@@ -193,7 +189,11 @@ export default function CardsTable({ isAdmin, userId, collections }) {
                         >
                           <Close />
                         </IconButton>
-                        <Select collectionList={collections} card={row}  addedToCollection={setAddToCollection}/>
+                        <Select
+                          collectionList={collections}
+                          card={row}
+                          addedToCollection={setAddToCollection}
+                        />
                       </Grid>
                     ) : (
                       <Grid>

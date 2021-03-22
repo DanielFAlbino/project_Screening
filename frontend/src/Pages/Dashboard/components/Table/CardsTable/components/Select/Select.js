@@ -16,19 +16,32 @@ const useStyles = makeStyles((theme) => ({
 function SelectData({ collectionList, card, addedToCollection }) {
   const classes = useStyles();
   const [collectionId, setCollectionId] = useState("");
-
+  let maxPerCard = 0;
   const onAdd = async (event) => {
     const coll = event.target.value;
+    if (coll.cardsList) {
+      if (coll.cardsList.length == 60) {
+        addedToCollection(false);
+        return alert("Collection limit reached!");
+      }
 
-    const data = {
-      _id: card._id,
-      name: card.name,
-      cardNumber: card.cardNumber,
-      description: card.description,
-    };
+      coll.cardsList.map((cards) => {
+        if (cards._id === card._id) {
+          return maxPerCard++;
+        }
+      });
 
-    coll.cardsList.push(data);
-
+      if (maxPerCard === 4) {
+        addedToCollection(false);
+        return alert(
+          "You can only have 4 cards with the same name/number in your collection"
+        );
+      }
+    }
+    if (!coll.cardsList) {
+      coll.cardsList = [];
+    }
+    coll.cardsList.push({ _id: card._id });
     const message = await update(coll._id, coll).then((res) => {
       return res.message;
     });

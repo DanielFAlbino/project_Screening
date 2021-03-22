@@ -13,7 +13,7 @@ import {
   TextField,
   IconButton,
   Tooltip,
-  MenuItem,
+  Typography,
 } from "@material-ui/core";
 import { Add, Delete, Edit } from "@material-ui/icons";
 import { Link } from "react-router-dom";
@@ -41,18 +41,15 @@ const useStyles = makeStyles({
   },
 });
 
-export default function CollectionTable({
-  titles,
-  isAdmin,
-  userId,
-  getCollections,
-}) {
+export default function CollectionTable({ isAdmin, userId, getCollections }) {
   const classes = useStyles();
   const [collections, setCollections] = useState([]);
   const [message, setMessage] = useState("");
   const [filter, setFilter] = useState("");
   const debounceFilter = useMemo(() => _.debounce(setFilter, 500), [setFilter]);
-
+  const collectionHeader = isAdmin
+    ? ["Collection", "User", "Actions"]
+    : ["Collection", "Actions"];
   const handleChange = (event) => {
     const value = event.target.value;
     setFilter(value);
@@ -60,7 +57,6 @@ export default function CollectionTable({
   };
 
   const onGetCollection = async () => {
-    if (!isAdmin) titles.splice(1, 2, "Actions");
     let data;
     if (isAdmin) {
       data = await getAllCollection().then((res) => {
@@ -72,18 +68,17 @@ export default function CollectionTable({
       });
     }
 
-    data.map(async (row) => {
-      const user = await getUser(row.userId).then((res) => {
+    data.map(async (row, index) => {
+      const username = await getUser(row.userId).then((res) => {
         return res.username;
       });
-      row.user = user;
     });
     if (filter) {
       const collectionFilter = [];
       data.filter((val) => {
         if (
           val.collectionName.includes(filter) ||
-          (val.user && val.user.includes(filter))
+          (val.username && val.username.includes(filter))
         )
           collectionFilter.push(val);
       });
@@ -107,7 +102,7 @@ export default function CollectionTable({
 
   useEffect(() => {
     onGetCollection();
-  }, [filter, message, collections]);
+  }, [filter, message]);
 
   return (
     <TableContainer component={Paper}>
@@ -128,7 +123,11 @@ export default function CollectionTable({
             ) : (
               <TableCell align="center" className={classes.cell}></TableCell>
             )}
-            <TableCell aalign="center" scope="row" colSpan={titles.length}>
+            <TableCell
+              aalign="center"
+              scope="row"
+              colSpan={collectionHeader.length}
+            >
               <TextField
                 className={classes.Input}
                 id="standard-basic"
@@ -139,39 +138,43 @@ export default function CollectionTable({
             </TableCell>
           </TableRow>
           <TableRow key={10}>
-            {titles.map((row) => (
-              <TableCell
-                align="center"
-                colSpan={!isAdmin ? titles.length + 1 : 1}
-              >
-                {row}
-              </TableCell>
+            {collectionHeader.map((row) => (
+              <TableCell align="center">{row}</TableCell>
             ))}
           </TableRow>
         </TableHead>
         <TableBody>
-          {collections.map((row) => (
-            <TableRow key={row._id}>
+          {!collections.length ? (
+            <TableRow>
               <TableCell
-                align="center"
-                colSpan={!isAdmin ? titles.length + 1 : 1}
+                component="th"
+                scope="row"
+                colSpan={collectionHeader.length}
               >
-                {row.collectionName}
+                <Typography variant="h6" component="h6" align="center">
+                  No data to show
+                </Typography>
               </TableCell>
-              {isAdmin ? (
+            </TableRow>
+          ) : (
+            collections.map((row) => (
+              <TableRow key={row._id}>
                 <TableCell component="th" align="center">
-                  <Link
-                    className={classes.linkColor}
-                    to={`profile/${row.userId}`}
-                  >
-                    {row.user}
-                  </Link>
+                  {row.collectionName}
                 </TableCell>
-              ) : (
-                <></>
-              )}
-              <TableCell align="center">
-                <MenuItem>
+                {isAdmin ? (
+                  <TableCell component="th">
+                    <Link
+                      className={classes.linkColor}
+                      to={`profile/${row.userId}`}
+                    >
+                      {row.username}
+                    </Link>
+                  </TableCell>
+                ) : (
+                  <></>
+                )}
+                <TableCell component="th" align="center">
                   <IconButton
                     aria-label="account of current user"
                     aria-controls="menu-appbar"
@@ -194,10 +197,10 @@ export default function CollectionTable({
                   >
                     <Delete />
                   </IconButton>
-                </MenuItem>
-              </TableCell>
-            </TableRow>
-          ))}
+                </TableCell>
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
     </TableContainer>

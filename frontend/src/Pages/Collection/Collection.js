@@ -39,8 +39,8 @@ function Collection(props) {
   const collection = props.match.params.collectionId;
   const [collections, setCollections] = useState([]);
   const [formData, setFormData] = useState({
+    _id: "",
     collectionName: "",
-    cardsList: [],
   });
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,11 +48,18 @@ function Collection(props) {
   const goBack = useCallback(() => history.push("/"), [history]);
 
   const handleGetCollection = async () => {
+    setIsSubmitting(true);
     const data = await getCollection(collection).then((res) => {
-      return res;
+      return res.collections;
     });
+    const arr = {
+      collectionName: data.collectionName,
+      _id: collections._id,
+    };
     setCollections(data.collections);
-    setFormData({ collectionName: collections.collectionName });
+
+    setFormData(arr);
+    setIsSubmitting(false);
   };
 
   const handleSubmit = (formData) => async (e) => {
@@ -83,7 +90,6 @@ function Collection(props) {
   };
 
   const handleChange = (name) => (event) => {
-    setMessage("");
     setFormData({
       ...formData,
       [name]: event.target.value,
@@ -91,7 +97,7 @@ function Collection(props) {
   };
 
   useEffect(() => {
-    if (collection) handleGetCollection();
+    handleGetCollection();
   }, []);
 
   return (
@@ -113,7 +119,7 @@ function Collection(props) {
           />
         </Grid>
         <Grid container lg={10}>
-          <Table cards={collections.cardsList} setCardsLis={formData} />
+          <Table collectionId={collection} />
         </Grid>
         <Grid>
           <Button
@@ -132,7 +138,7 @@ function Collection(props) {
             color="inherit"
             onClick={goBack}
           >
-            Cancel
+            Close
           </Button>
         </Grid>
         {message ? (

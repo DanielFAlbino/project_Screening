@@ -17,7 +17,7 @@ import {
 } from "@material-ui/core";
 import { Add, Delete, Edit } from "@material-ui/icons";
 import { Link } from "react-router-dom";
-import { getUsers } from "../../Services/user";
+import { getUsers, remove } from "../../Services/user";
 import { getUserId } from "../../Utils/localStorage";
 import Navbar from "../../Components/NavBar/NavBar";
 
@@ -65,8 +65,17 @@ export default function UsersTable() {
     return users;
   };
 
-  const onDelete = (id) => {
-    console.log(id);
+  const onDelete = async (id, username) => {
+    const res = window.confirm(
+      `You are about to remove user '${username}', continue?`
+    );
+    if (res) {
+      const message = await remove(id).then((res) => {
+        return res.message;
+      });
+      onGetUsers();
+      return;
+    }
   };
 
   useEffect(() => {
@@ -126,7 +135,7 @@ export default function UsersTable() {
                         aria-label="account of current user"
                         aria-controls="menu-appbar"
                         aria-haspopup="true"
-                        onClick={() => onDelete(row._id)}
+                        onClick={() => onDelete(row._id, row.username)}
                         color="inherit"
                       >
                         <Delete />

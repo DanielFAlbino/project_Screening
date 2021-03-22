@@ -47,18 +47,24 @@ exports.getByUser = async (req, res) => {
 
 exports.update = async (req, res) => {
   const _id = req.params.collectionId;
-  const collectionParams = {
-    user: req.body.user,
-    collectionName: req.body.collectionName,
-    cardsList: req.body.cardsList,
-  };
+  var collectionParams = [];
+  if (req.body.user) {
+    collectionParams.push({
+      userId: req.body.userId,
+      collectionName: req.body.collectionName,
+    });
+  }
+
+  if (req.body.cardsList) {
+    collectionParams.push({ cardsList: req.body.cardsList });
+  }
 
   await CollectionModel.updateOne({ _id }, { $set: collectionParams })
     .then(() => {
       return res.status(200).json({ message: "Collection was updated!" });
     })
     .catch((error) => {
-      return res.status(400).json(error);
+      return res.status(400).json({ message: error });
     });
 };
 
@@ -73,7 +79,7 @@ exports.add = async (req, res) => {
       return res.status(200).json({ message: "Success!" });
     })
     .catch((error) => {
-      return res.status(400).json({ error: error });
+      return res.status(400).json({ message: error });
     });
 };
 
@@ -84,6 +90,6 @@ exports.delete = async (req, res) => {
       return res.status(200).json({ message: "Collection was deleted!" });
     })
     .catch((error) => {
-      return res.status(400).json(error);
+      return res.status(400).json({ message: error });
     });
 };
