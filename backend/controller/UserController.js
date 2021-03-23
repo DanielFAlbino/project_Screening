@@ -24,14 +24,18 @@ exports.getAll = async (req, res) => {
     if (!users) {
       return res.status(404).json({ message: "Users not found!" });
     }
-    return res.status(200).json(users);
+    return res.status(200).json({ users });
   } catch (err) {
     throw err;
   }
 };
 
 exports.update = async (req, res) => {
-  if (!req._user.isAdmin) {
+  console.log(req._user._id, req.params.userId);
+  if (
+    JSON.stringify(req._user._id) !== JSON.stringify(req.params.userId) &&
+    !req._user.isAdmin
+  ) {
     return res.status(401).json({ message: "You don't have permition" });
   }
   const user = await UserModel.findOne({
@@ -73,6 +77,6 @@ exports.delete = async (req, res) => {
       return res.status(200).json({ message: "User was deleted!" });
     })
     .catch((error) => {
-      return res.status(400).json(error);
+      return res.status(400).json({ message: error });
     });
 };

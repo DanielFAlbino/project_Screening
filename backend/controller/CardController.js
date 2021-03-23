@@ -61,7 +61,7 @@ exports.add = async (req, res) => {
         return res.status(200).json({ message: "Success!" });
       })
       .catch((error) => {
-        return res.status(400).json({ error: error });
+        return res.status(400).json({ message: error });
       });
   }
 
@@ -81,7 +81,7 @@ exports.update = async (req, res) => {
       return res.status(200).json({ message: "Card updated!" });
     })
     .catch((error) => {
-      return res.status(400).json({ error: erro });
+      return res.status(400).json({ message: erro });
     });
 };
 

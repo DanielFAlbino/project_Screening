@@ -7,7 +7,11 @@ import {
   TextField,
   Button,
   FormControlLabel,
+  Collapse,
+  IconButton,
 } from "@material-ui/core";
+import { Close } from "@material-ui/icons";
+import Alert from "@material-ui/lab/Alert";
 
 import { getUserId } from "../../Utils/localStorage";
 import { update, getUser } from "../../Services/user";
@@ -37,9 +41,12 @@ const useStyles = makeStyles((theme) => ({
   tf: {
     width: "100vh !important",
   },
-
-  message: {
-    margin: "10px",
+  Flag: {
+    position: "absolute",
+    top: "80px",
+    right: "20px",
+    width: "300px",
+    zIndex: "2",
   },
 }));
 
@@ -48,6 +55,9 @@ function Profile(props) {
   const userId = JSON.parse(getUserId())._id;
   const user = props.match.params.userId;
   const classes = useStyles();
+  const [message, setMessage] = useState("");
+  const [messageColor, setMessageColor] = useState("");
+  const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     username: "",
     name: "",
@@ -58,12 +68,12 @@ function Profile(props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const history = useHistory();
-  const goBack = useCallback(() => history.push("/"), [history]);
+  const goBack = useCallback(() => history.goBack(), [history]);
 
   const handleChange = (name) => (event) => {
     setFormData({
       ...formData,
-      [name]: event.target.value || event.target.checked,
+      [name]: name === "isAdmin" ? event.target.checked : event.target.value,
     });
   };
 
@@ -88,14 +98,19 @@ function Profile(props) {
     e.preventDefault();
     setIsSubmitting(true);
     console.log(formData);
-    await update(formData).then((res) => {
-      setIsSubmitting(false);
-      if (res) {
-        return res.startus(200).send("User updated!");
-      } else {
-        return res.startus(400).send("Impossible to update user!");
-      }
-    });
+    await update(userId, formData)
+      .then((res) => {
+        setOpen(true);
+        setIsSubmitting(false);
+        setMessage(res.message);
+        setMessageColor("success");
+      })
+      .catch((err) => {
+        setOpen(true);
+        setMessage(err.message);
+        setMessageColor("error");
+      });
+    setIsSubmitting(false);
   };
 
   useEffect(() => {
@@ -111,6 +126,28 @@ function Profile(props) {
       alignContent="center"
     >
       <Navbar />
+      {message ? (
+        <Collapse in={open} className={classes.Flag}>
+          <Alert
+            severity={messageColor}
+            action={
+              <IconButton
+                aria-label="close"
+                size="small"
+                onClick={() => {
+                  setOpen(false);
+                }}
+              >
+                <Close fontSize="inherit" />
+              </IconButton>
+            }
+          >
+            {message}
+          </Alert>
+        </Collapse>
+      ) : (
+        <></>
+      )}
       <form
         className={classes.root}
         noValidate

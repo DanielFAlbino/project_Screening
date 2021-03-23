@@ -76,7 +76,7 @@ exports.add = async (req, res) => {
   data.userId = req._user._id;
   await CollectionModel.create(data)
     .then(() => {
-      return res.status(200).json({ message: "Success!" });
+      return res.status(200).json({ message: "Collection Resgistered!" });
     })
     .catch((error) => {
       return res.status(400).json({ message: error });

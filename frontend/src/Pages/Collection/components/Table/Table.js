@@ -11,6 +11,7 @@ import {
   IconButton,
   TableRow,
   MenuItem,
+  Card,
 } from "@material-ui/core/";
 import { Delete } from "@material-ui/icons";
 
@@ -36,12 +37,14 @@ export default function TableData({ collectionId }) {
       return res.collections.cardsList;
     });
     if (data && data.length > 0) {
-      data.map(async (card) => {
-        let cardId = card._id;
-        await getCard(cardId).then((res) => {
-          cardsList.push(res.card);
-        });
-      });
+      await Promise.all(
+        data.map(async (card) => {
+          let cardId = card._id;
+          await getCard(cardId).then((res) => {
+            cardsList.push(res.card);
+          });
+        })
+      );
       setIsSubmitting(false);
       setCard(cardsList);
       return;
@@ -58,10 +61,8 @@ export default function TableData({ collectionId }) {
         " from your collection, continue?"
     );
     if (res) {
-      console.log("here");
       const data = card;
       data.splice(index, 1);
-      console.log(data);
       setCard(data);
       const collection = {
         cardsList: data,
@@ -76,7 +77,7 @@ export default function TableData({ collectionId }) {
 
   useEffect(() => {
     handleCards();
-  }, []);
+  }, [card]);
 
   return (
     <Grid>

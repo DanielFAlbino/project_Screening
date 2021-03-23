@@ -68,11 +68,14 @@ export default function CollectionTable({ isAdmin, userId, getCollections }) {
       });
     }
 
-    data.map(async (row, index) => {
-      const username = await getUser(row.userId).then((res) => {
-        return res.username;
-      });
-    });
+    // Get user by userId to show in collections table (if the user is admin)
+    await Promise.all(
+      data.map(async (row, index) => {
+        const user = await getUser(row.userId);
+        row.username = user.username;
+      })
+    );
+
     if (filter) {
       const collectionFilter = [];
       data.filter((val) => {
@@ -84,8 +87,8 @@ export default function CollectionTable({ isAdmin, userId, getCollections }) {
       });
       data = collectionFilter;
     }
-    getCollections(data);
     setCollections(data);
+    getCollections(data);
   };
 
   const onDelete = (id, name) => async (e) => {
@@ -157,13 +160,13 @@ export default function CollectionTable({ isAdmin, userId, getCollections }) {
               </TableCell>
             </TableRow>
           ) : (
-            collections.map((row) => (
-              <TableRow key={row._id}>
+            collections.map((row, index) => (
+              <TableRow key={index}>
                 <TableCell component="th" align="center">
                   {row.collectionName}
                 </TableCell>
                 {isAdmin ? (
-                  <TableCell component="th">
+                  <TableCell component="th" align="center">
                     <Link
                       className={classes.linkColor}
                       to={`profile/${row.userId}`}

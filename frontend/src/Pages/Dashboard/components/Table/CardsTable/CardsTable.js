@@ -73,11 +73,13 @@ export default function CardsTable({ isAdmin, userId, collections }) {
       });
     }
 
-    data.map(async (row) => {
-      await getUser(row.userId).then((res) => {
-        row.username = res.username;
-      });
-    });
+    // Get user by userId to show in collections table (if the user is admin)
+    await Promise.all(
+      data.map(async (row, index) => {
+        const user = await getUser(row.userId);
+        row.username = user.username;
+      })
+    );
 
     if (filter) {
       const cardsFilter = [];
@@ -153,8 +155,8 @@ export default function CardsTable({ isAdmin, userId, collections }) {
               </TableCell>
             </TableRow>
           ) : (
-            cards.map((row) => (
-              <TableRow key={row._id}>
+            cards.map((row, index) => (
+              <TableRow key={index}>
                 <TableCell component="th" align="center">
                   {row.cardNumber}
                 </TableCell>
@@ -165,7 +167,7 @@ export default function CardsTable({ isAdmin, userId, collections }) {
                   {row.description}
                 </TableCell>
                 {isAdmin ? (
-                  <TableCell component="th">
+                  <TableCell component="th" align="center">
                     <Link
                       className={classes.linkColor}
                       to={`profile/${row.userId}`}

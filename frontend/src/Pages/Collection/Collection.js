@@ -3,7 +3,16 @@ import Grid from "@material-ui/core/Grid";
 import { register, getCollection, update } from "../../Services/collection";
 import { useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
-import { TextField, Button, Typography } from "@material-ui/core";
+import {
+  TextField,
+  Button,
+  Typography,
+  Collapse,
+  IconButton,
+} from "@material-ui/core";
+import { Close } from "@material-ui/icons";
+import Alert from "@material-ui/lab/Alert";
+
 import Table from "./components/Table/Table";
 
 import { getUserId } from "../../Utils/localStorage";
@@ -32,6 +41,13 @@ const useStyles = makeStyles((theme) => ({
     marginTop: "0px",
     parrdingTop: "0px",
   },
+  Flag: {
+    position: "absolute",
+    top: "80px",
+    right: "20px",
+    width: "300px",
+    zIndex: "2",
+  },
 }));
 
 function Collection(props) {
@@ -39,26 +55,30 @@ function Collection(props) {
   const collection = props.match.params.collectionId;
   const [collections, setCollections] = useState([]);
   const [formData, setFormData] = useState({
-    _id: "",
     collectionName: "",
   });
   const [message, setMessage] = useState("");
+  const [messageColor, setMessageColor] = useState("");
+  const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const history = useHistory();
   const goBack = useCallback(() => history.push("/"), [history]);
 
   const handleGetCollection = async () => {
     setIsSubmitting(true);
-    const data = await getCollection(collection).then((res) => {
-      return res.collections;
-    });
-    const arr = {
-      collectionName: data.collectionName,
-      _id: collections._id,
-    };
-    setCollections(data.collections);
+    setOpen(false);
+    if (collection) {
+      const data = await getCollection(collection).then((res) => {
+        return res.collections;
+      });
+      const arr = {
+        collectionName: data.collectionName,
+        _id: data._id,
+      };
+      setCollections(data.collections);
 
-    setFormData(arr);
+      setFormData(arr);
+    }
     setIsSubmitting(false);
   };
 
@@ -66,26 +86,38 @@ function Collection(props) {
     e.preventDefault();
     setIsSubmitting(true);
     const user = JSON.parse(getUserId());
-    let message;
     formData.userId = user._id;
     if (!formData.collectionName.trim()) {
       setIsSubmitting(false);
-      return setMessage("All fields are required");
+      setMessage("All fields are required");
+      setMessageColor("error");
+      setOpen(true);
     }
 
     if (collection) {
-      message = await update(formData._id, formData).then((res) => {
-        return res.message;
-      });
+      await update(formData._id, formData)
+        .then((res) => {
+          setMessage(res.message);
+          setMessageColor("success");
+        })
+        .catch((err) => {
+          setMessage(err.message);
+          setMessageColor("error");
+        });
+      setOpen(true);
       setIsSubmitting(false);
-      setMessage(message);
       return;
     }
-    message = await register(formData).then((res) => {
-      return res.message;
-    });
-
-    setMessage(message);
+    await register(formData)
+      .then((res) => {
+        setMessage(res.message);
+        setMessageColor("success");
+      })
+      .catch((err) => {
+        setMessage(err.message);
+        setMessageColor("error");
+      });
+    setOpen(true);
     setIsSubmitting(false);
   };
 
@@ -103,6 +135,28 @@ function Collection(props) {
   return (
     <Grid container direction="row" justify="center" alignItems="center">
       <Navbar />
+      {message ? (
+        <Collapse in={open} className={classes.Flag}>
+          <Alert
+            severity={messageColor}
+            action={
+              <IconButton
+                aria-label="close"
+                size="small"
+                onClick={() => {
+                  setOpen(false);
+                }}
+              >
+                <Close fontSize="inherit" />
+              </IconButton>
+            }
+          >
+            {message}
+          </Alert>
+        </Collapse>
+      ) : (
+        <></>
+      )}
       <form
         className={classes.root}
         noValidate
@@ -141,13 +195,6 @@ function Collection(props) {
             Close
           </Button>
         </Grid>
-        {message ? (
-          <Typography color="error" variant="overline" display="inline">
-            {message}
-          </Typography>
-        ) : (
-          <Typography></Typography>
-        )}
       </form>
     </Grid>
   );

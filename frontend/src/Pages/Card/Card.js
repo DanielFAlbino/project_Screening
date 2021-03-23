@@ -7,7 +7,12 @@ import {
   TextareaAutosize,
   Button,
   Typography,
+  Collapse,
+  IconButton,
 } from "@material-ui/core";
+import { Close } from "@material-ui/icons";
+import Alert from "@material-ui/lab/Alert";
+
 import Navbar from "../../Components/NavBar/NavBar";
 import { useHistory } from "react-router-dom";
 import { getCard, update, register } from "../../Services/card";
@@ -33,6 +38,13 @@ const useStyles = makeStyles((theme) => ({
     margin: "10px",
     width: "90vh",
   },
+  Flag: {
+    position: "absolute",
+    top: "80px",
+    right: "20px",
+    width: "300px",
+    zIndex: "2",
+  },
 }));
 
 function Card(props) {
@@ -40,6 +52,8 @@ function Card(props) {
   const classes = useStyles();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
+  const [messageColor, setMessageColor] = useState("");
+  const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     cardNumber: 0,
     name: "",
@@ -70,7 +84,6 @@ function Card(props) {
     e.preventDefault();
     setIsSubmitting(true);
     const user = JSON.parse(getUserId());
-    let message;
     formData.userId = user._id;
 
     if (
@@ -82,20 +95,27 @@ function Card(props) {
       return setMessage("All fields are required");
     }
     if (card) {
-      message = await update(formData._id, formData).then((res) => {
-        return res.message;
-      });
-
-      setIsSubmitting(false);
-      setMessage(message);
-      return;
+      await update(formData._id, formData)
+        .then((res) => {
+          setMessage(res.message);
+          setMessageColor("success");
+        })
+        .catch((err) => {
+          setMessage(err.message);
+          setMessageColor("error");
+        });
+    } else {
+      await register(formData)
+        .then((res) => {
+          setMessage(res.message);
+          setMessageColor("success");
+        })
+        .catch((err) => {
+          setMessage(err.message);
+          setMessageColor("error");
+        });
     }
-
-    message = await register(formData).then((res) => {
-      return res.message;
-    });
-
-    setMessage(message);
+    setOpen(true);
     setIsSubmitting(false);
   };
 
@@ -106,6 +126,29 @@ function Card(props) {
   return (
     <Grid container direction="row" justify="center" alignItems="center">
       <Navbar />
+      {message ? (
+        <Collapse in={open} className={classes.Flag}>
+          <Alert
+            severity={messageColor}
+            action={
+              <IconButton
+                aria-label="close"
+                size="small"
+                onClick={() => {
+                  setOpen(false);
+                }}
+              >
+                <Close fontSize="inherit" />
+              </IconButton>
+            }
+          >
+            {message}
+          </Alert>
+        </Collapse>
+      ) : (
+        <></>
+      )}
+
       <form
         className={classes.root}
         noValidate
@@ -158,13 +201,6 @@ function Card(props) {
             Close
           </Button>
         </Grid>
-        {message ? (
-          <Typography color="error" variant="overline" display="inline">
-            {message}
-          </Typography>
-        ) : (
-          <Typography></Typography>
-        )}
       </form>
     </Grid>
   );

@@ -1,4 +1,4 @@
-import { React, useState } from "react";
+import { React, useState, useEffect } from "react";
 import Grid from "@material-ui/core/Grid";
 import CollectionsTable from "./components/Table/CollectionsTable/CollectionTable";
 import CardsTable from "./components/Table/CardsTable/CardsTable";

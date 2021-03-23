@@ -1,4 +1,4 @@
-import { React, useMemo, useState, useEffect } from "react";
+import { React, useMemo, useState, useEffect, useCallback } from "react";
 import _ from "lodash";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -11,12 +11,12 @@ import {
   TableRow,
   Paper,
   IconButton,
-  Tooltip,
   TextField,
   MenuItem,
 } from "@material-ui/core";
-import { Add, Delete, Edit } from "@material-ui/icons";
+import { Delete, Edit } from "@material-ui/icons";
 import { Link } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { getUsers, remove } from "../../Services/user";
 import { getUserId } from "../../Utils/localStorage";
 import Navbar from "../../Components/NavBar/NavBar";
@@ -34,12 +34,14 @@ const useStyles = makeStyles({
 });
 
 export default function UsersTable() {
+  const history = useHistory();
   const [users, setUsers] = useState([]);
   const classes = useStyles();
   const tableHeader = ["Name", "Usermame", "Actions"];
   const userId = getUserId();
   const [filter, setFilter] = useState("");
   const debounceFilter = useMemo(() => _.debounce(setFilter, 500), [setFilter]);
+  const goBack = useCallback(() => history.push("/"), [history]);
 
   const handleChange = (event) => {
     const value = event.target.value;
@@ -48,11 +50,13 @@ export default function UsersTable() {
   };
 
   const onGetUsers = async () => {
+    if (!userId.isAdmin) {
+      goBack();
+    }
     const users = await getUsers().then((res) => {
-      return res;
+      return res.users;
     });
     setUsers(users);
-
     if (filter) {
       const usersFilter = [];
       users.filter((val) => {
