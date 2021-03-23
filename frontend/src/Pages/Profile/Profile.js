@@ -103,7 +103,6 @@ function Profile(props) {
   const handleSubmit = (formData) => async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    console.log(formData);
     await update(userId, formData)
       .then((res) => {
         setOpen(true);

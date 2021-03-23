@@ -10,8 +10,6 @@ import {
   TableHead,
   IconButton,
   TableRow,
-  MenuItem,
-  Card,
 } from "@material-ui/core/";
 import { Delete } from "@material-ui/icons";
 
@@ -21,6 +19,7 @@ import { getCard } from "../../../../Services/card";
 const useStyles = makeStyles({
   table: {
     minWidth: "100vh",
+    maxWidth: "122vh",
   },
 });
 
@@ -39,10 +38,8 @@ export default function TableData({ collectionId }) {
     if (data && data.length > 0) {
       await Promise.all(
         data.map(async (card) => {
-          let cardId = card._id;
-          await getCard(cardId).then((res) => {
-            cardsList.push(res.card);
-          });
+          const res = await getCard(card._id);
+          cardsList.push(res.card);
         })
       );
       setIsSubmitting(false);
@@ -54,7 +51,7 @@ export default function TableData({ collectionId }) {
     }
   };
 
-  const onDelete = async (index, id, name) => {
+  const onDelete = async (index, name) => {
     const res = window.confirm(
       "You are about to remove the Card " +
         name +
@@ -68,16 +65,17 @@ export default function TableData({ collectionId }) {
         cardsList: data,
       };
 
-      const message = await update(id, collection).then((res) => {
+      const message = await update(collectionId, collection).then((res) => {
         return res.message;
       });
       alert(message);
+      handleCards();
     }
   };
 
   useEffect(() => {
     handleCards();
-  }, [card]);
+  }, []);
 
   return (
     <Grid>
@@ -94,29 +92,27 @@ export default function TableData({ collectionId }) {
             {card ? (
               card.map((row, index) => (
                 <TableRow key={index}>
-                  <TableCell component="th" scope="row">
+                  <TableCell component="th" scope="row" align="center">
                     {row.cardNumber}
                   </TableCell>
-                  <TableCell component="th" scope="row">
+                  <TableCell component="th" scope="row" align="center">
                     {row.name}
                   </TableCell>
-                  <TableCell component="th" scope="row">
+                  <TableCell component="th" scope="row" align="center">
                     {row.description}
                   </TableCell>
-                  <TableCell component="th" scope="row">
-                    <MenuItem>
-                      <IconButton
-                        aria-label="account of current user"
-                        aria-controls="menu-appbar"
-                        aria-haspopup="true"
-                        onClick={() =>
-                          onDelete(index, row._id, row.collectionName)
-                        }
-                        color="inherit"
-                      >
-                        <Delete />
-                      </IconButton>
-                    </MenuItem>
+                  <TableCell component="th" scope="row" align="center">
+                    <IconButton
+                      aria-label="account of current user"
+                      aria-controls="menu-appbar"
+                      aria-haspopup="true"
+                      onClick={() =>
+                        onDelete(index, row._id, row.collectionName)
+                      }
+                      color="inherit"
+                    >
+                      <Delete />
+                    </IconButton>
                   </TableCell>
                 </TableRow>
               ))

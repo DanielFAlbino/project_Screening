@@ -70,9 +70,7 @@ exports.add = async (req, res) => {
 
 exports.update = async (req, res) => {
   const _id = req.params.cardId;
-  console.log(req.body);
   const data = await CardModel.find({ _id });
-  console.log(data.length);
   if (data.length === 0) {
     return res.status(404).json({ message: "Card not found" });
   }
@@ -93,7 +91,6 @@ exports.update = async (req, res) => {
 exports.delete = async (req, res) => {
   const _id = req.params.cardId;
   const data = await CardModel.find({ _id });
-  console.log(data.length);
   if (data.length === 0) {
     return res.status(404).json({ message: "Card not found" });
   }

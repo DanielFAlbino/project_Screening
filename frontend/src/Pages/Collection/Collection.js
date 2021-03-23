@@ -3,13 +3,7 @@ import Grid from "@material-ui/core/Grid";
 import { register, getCollection, update } from "../../Services/collection";
 import { useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
-import {
-  TextField,
-  Button,
-  Typography,
-  Collapse,
-  IconButton,
-} from "@material-ui/core";
+import { TextField, Button, Collapse, IconButton } from "@material-ui/core";
 import { Close } from "@material-ui/icons";
 import Alert from "@material-ui/lab/Alert";
 
@@ -89,8 +83,6 @@ function Collection(props) {
   const handleSubmit = (formData) => async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    const user = JSON.parse(getUserId());
-    formData.userId = user._id;
     if (!formData.collectionName.trim()) {
       setIsSubmitting(false);
       setMessage("All fields are required");
@@ -170,7 +162,7 @@ function Collection(props) {
         autoComplete="off"
         onSubmit={handleSubmit(formData)}
       >
-        <Grid>
+        <Grid item className={classes.txtField}>
           <TextField
             name="collectionName"
             label="collection name"

@@ -31,7 +31,6 @@ exports.getAll = async (req, res) => {
 };
 
 exports.update = async (req, res) => {
-  console.log(req._user._id, req.params.userId);
   if (
     JSON.stringify(req._user._id) !== JSON.stringify(req.params.userId) &&
     !req._user.isAdmin

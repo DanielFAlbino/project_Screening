@@ -9,6 +9,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Typography,
   Paper,
   IconButton,
   TextField,
@@ -115,41 +116,55 @@ export default function UsersTable() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {users.map((row) => (
-              <TableRow key={row._id}>
-                <TableCell component="th" scope="row" align="center">
-                  {row.name}
+            {!users.length ? (
+              <TableRow>
+                <TableCell
+                  component="th"
+                  scope="row"
+                  colSpan={tableHeader.length}
+                >
+                  <Typography variant="h6" component="h6" align="center">
+                    No data to show
+                  </Typography>
                 </TableCell>
-                <TableCell align="center">{row.username}</TableCell>
-                <TableCell align="center">
-                  <MenuItem align="center">
-                    <IconButton
-                      aria-label="account of current user"
-                      aria-controls="menu-appbar"
-                      aria-haspopup="true"
-                      color="inherit"
-                    >
-                      <Link to={`profile/${row._id}`}>
-                        <Edit />
-                      </Link>
-                    </IconButton>
-                    {row._id === JSON.parse(userId)._id ? (
-                      <></>
-                    ) : (
+              </TableRow>
+            ) : (
+              users.map((row) => (
+                <TableRow key={row._id}>
+                  <TableCell component="th" scope="row" align="center">
+                    {row.name}
+                  </TableCell>
+                  <TableCell align="center">{row.username}</TableCell>
+                  <TableCell align="center">
+                    <MenuItem align="center">
                       <IconButton
                         aria-label="account of current user"
                         aria-controls="menu-appbar"
                         aria-haspopup="true"
-                        onClick={() => onDelete(row._id, row.username)}
                         color="inherit"
                       >
-                        <Delete />
+                        <Link to={`profile/${row._id}`}>
+                          <Edit />
+                        </Link>
                       </IconButton>
-                    )}
-                  </MenuItem>
-                </TableCell>
-              </TableRow>
-            ))}
+                      {row._id === JSON.parse(userId)._id ? (
+                        <></>
+                      ) : (
+                        <IconButton
+                          aria-label="account of current user"
+                          aria-controls="menu-appbar"
+                          aria-haspopup="true"
+                          onClick={() => onDelete(row._id, row.username)}
+                          color="inherit"
+                        >
+                          <Delete />
+                        </IconButton>
+                      )}
+                    </MenuItem>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>
