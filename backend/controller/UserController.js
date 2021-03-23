@@ -1,4 +1,7 @@
 const UserModel = require("../models/UserModel");
+const CollectionModel = require("../models/CollectionModel");
+const CardModel = require("../models/CardModel");
+
 const bcrypt = require("bcryptjs");
 
 exports.get = async (req, res) => {
@@ -71,8 +74,14 @@ exports.delete = async (req, res) => {
     return res.status(401).json({ message: "You don't have permition" });
   }
   const _id = req.params.userId;
-  await UserModel.findByIdAndRemove({ _id })
-    .then(() => {
+  const data = await UserModel.find({ _id });
+  if (data.length === 0) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  await CollectionModel.deleteMany({ userId: _id });
+  await CardModel.deleteMany({ userId: _id });
+  await UserModel.findOneAndDelete({ _id })
+    .then(async () => {
       return res.status(200).json({ message: "User was deleted!" });
     })
     .catch((error) => {

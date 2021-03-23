@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 
 const collectionDataSchema = new Schema(
   {
-    userId: { type: String, required: true, unique: false },
+    userId: { type: String, required: false, unique: false },
     collectionName: { type: String, required: true, unique: false },
     cardsList: [{ _id: String }],
   },

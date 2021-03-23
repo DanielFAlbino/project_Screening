@@ -67,6 +67,13 @@ function Login() {
   const handleSubmit = (formData) => async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    var regex = /^[a-zA-Z]+$/;
+    const res = regex.test(formData.name);
+    if (!res) {
+      setMessage("Name must contain only letters");
+      setIsSubmitting(false);
+      return;
+    }
     if (
       !formData.username.trim() ||
       !formData.name.trim() ||
@@ -78,8 +85,6 @@ function Login() {
     } else {
       try {
         await add(formData).then((res) => {
-          setUser(res.user);
-          setToken(res.token);
           goTo();
         });
       } catch (err) {

@@ -46,7 +46,6 @@ exports.getByUser = async (req, res) => {
 };
 
 exports.update = async (req, res) => {
-  console.log(req.body);
   const _id = req.params.collectionId;
   const data = await CollectionModel.find({ _id });
   if (data.length === 0) {
@@ -70,6 +69,7 @@ exports.add = async (req, res) => {
     return res.status(401).json({ message: "You don't have permition" });
   }
   let data = req.body;
+  data.userId = req._user._id;
   await CollectionModel.create(data)
     .then(() => {
       return res.status(200).json({ message: "Collection Resgistered!" });
