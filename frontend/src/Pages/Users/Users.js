@@ -28,7 +28,7 @@ const useStyles = makeStyles({
   },
   Input: {
     paddingTop: "0px",
-    marginTop: "-20px",
+    marginTop: "5px",
     width: "45vh",
   },
 });
@@ -50,7 +50,8 @@ export default function UsersTable() {
   };
 
   const onGetUsers = async () => {
-    if (!userId.isAdmin) {
+    const admin = JSON.parse(userId).isAdmin;
+    if (!admin) {
       goBack();
     }
     const users = await getUsers().then((res) => {

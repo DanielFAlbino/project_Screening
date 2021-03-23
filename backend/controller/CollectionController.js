@@ -47,21 +47,17 @@ exports.getByUser = async (req, res) => {
 
 exports.update = async (req, res) => {
   const _id = req.params.collectionId;
-  var collectionParams = [];
-  if (req.body.user) {
-    collectionParams.push({
-      userId: req.body.userId,
-      collectionName: req.body.collectionName,
-    });
+  const data = await CollectionModel.find({ _id });
+  if (data.length === 0) {
+    return res.status(404).json({ message: "Collection not found" });
   }
 
-  if (req.body.cardsList) {
-    collectionParams.push({ cardsList: req.body.cardsList });
-  }
-
-  await CollectionModel.updateOne({ _id }, { $set: collectionParams })
-    .then(() => {
-      return res.status(200).json({ message: "Collection was updated!" });
+  await CollectionModel.findOneAndUpdate({ _id }, { $set: req.body })
+    .then((result) => {
+      if (result) {
+        return res.status(200).json({ message: "Collection was updated!" });
+      }
+      return res.status(304).json({ message: "Collection not updated!" });
     })
     .catch((error) => {
       return res.status(400).json({ message: error });
@@ -85,6 +81,10 @@ exports.add = async (req, res) => {
 
 exports.delete = async (req, res) => {
   const _id = req.params.collectionId;
+  const data = await CollectionModel.find({ _id });
+  if (data.length === 0) {
+    return res.status(404).json({ message: "Collection not found" });
+  }
   await CollectionModel.findByIdAndRemove({ _id })
     .then(() => {
       return res.status(200).json({ message: "Collection was deleted!" });

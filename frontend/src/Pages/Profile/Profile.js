@@ -56,6 +56,7 @@ function Profile(props) {
   const user = props.match.params.userId;
   const classes = useStyles();
   const [message, setMessage] = useState("");
+  const [checked, setChecked] = useState(false);
   const [messageColor, setMessageColor] = useState("");
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -83,13 +84,18 @@ function Profile(props) {
       goBack();
       return;
     }
+
     const data = await getUser(user).then((res) => {
       return res;
     });
+
     const arr = {
       username: data.username,
       name: data.name,
+      isAdmin: data.isAdmin,
     };
+
+    arr.isAdmin ? setChecked(true) : setChecked(false);
     setIsSubmitting(false);
     setFormData(arr);
   };
@@ -195,6 +201,7 @@ function Profile(props) {
             <FormControlLabel
               control={
                 <Checkbox
+                  checked={checked}
                   onChange={handleChange("isAdmin")}
                   name="checkedB"
                   color="primary"

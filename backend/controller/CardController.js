@@ -70,11 +70,16 @@ exports.add = async (req, res) => {
 
 exports.update = async (req, res) => {
   const _id = req.params.cardId;
+  console.log(req.body);
+  const data = await CardModel.find({ _id });
+  console.log(data.length);
+  if (data.length === 0) {
+    return res.status(404).json({ message: "Card not found" });
+  }
   const cardParams = {
     name: req.body.name,
     cardNumber: req.body.cardNumber,
     description: req.body.description,
-    userId: req.body.userId,
   };
   await CardModel.updateOne({ _id: _id }, { $set: cardParams })
     .then(() => {
@@ -87,9 +92,14 @@ exports.update = async (req, res) => {
 
 exports.delete = async (req, res) => {
   const _id = req.params.cardId;
+  const data = await CardModel.find({ _id });
+  console.log(data.length);
+  if (data.length === 0) {
+    return res.status(404).json({ message: "Card not found" });
+  }
   await CardModel.deleteOne({ _id }).then((result) => {
-    if (result.deleteCount > 0)
+    if (result.deletedCount > 0) {
       return res.status(200).json({ message: "Card deleted!" });
-    return res.status(404).json({ message: "Card not found!" });
+    }
   });
 };

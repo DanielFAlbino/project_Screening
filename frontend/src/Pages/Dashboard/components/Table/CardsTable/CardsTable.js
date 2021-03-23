@@ -216,7 +216,10 @@ export default function CardsTable({ isAdmin, userId, collections }) {
                         >
                           <Link
                             className={classes.linkColor}
-                            to={`card/${row._id}`}
+                            to={{
+                              pathname: `card/${row._id}`,
+                              state: { editing: true },
+                            }}
                           >
                             <Edit />
                           </Link>

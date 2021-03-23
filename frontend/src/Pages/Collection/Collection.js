@@ -14,7 +14,6 @@ import { Close } from "@material-ui/icons";
 import Alert from "@material-ui/lab/Alert";
 
 import Table from "./components/Table/Table";
-
 import { getUserId } from "../../Utils/localStorage";
 import Navbar from "../../Components/NavBar/NavBar";
 
@@ -53,6 +52,7 @@ const useStyles = makeStyles((theme) => ({
 function Collection(props) {
   const classes = useStyles();
   const collection = props.match.params.collectionId;
+  const isAdmin = JSON.parse(getUserId()).isAdmin;
   const [collections, setCollections] = useState([]);
   const [formData, setFormData] = useState({
     collectionName: "",
@@ -63,6 +63,10 @@ function Collection(props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const history = useHistory();
   const goBack = useCallback(() => history.push("/"), [history]);
+  let isEdit = false;
+  if (props.location.state) {
+    isEdit = props.location.state.editing;
+  }
 
   const handleGetCollection = async () => {
     setIsSubmitting(true);
@@ -129,6 +133,9 @@ function Collection(props) {
   };
 
   useEffect(() => {
+    if (isAdmin && !isEdit) {
+      goBack();
+    }
     handleGetCollection();
   }, []);
 

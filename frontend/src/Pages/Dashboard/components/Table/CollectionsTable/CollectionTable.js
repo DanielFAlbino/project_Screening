@@ -186,7 +186,10 @@ export default function CollectionTable({ isAdmin, userId, getCollections }) {
                   >
                     <Link
                       className={classes.linkColor}
-                      to={`collection/${row._id}`}
+                      to={{
+                        pathname: `collection/${row._id}`,
+                        state: { editing: true },
+                      }}
                     >
                       <Edit />
                     </Link>

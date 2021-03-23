@@ -6,7 +6,6 @@ import {
   TextField,
   TextareaAutosize,
   Button,
-  Typography,
   Collapse,
   IconButton,
 } from "@material-ui/core";
@@ -50,6 +49,7 @@ const useStyles = makeStyles((theme) => ({
 function Card(props) {
   const card = props.match.params.cardId;
   const classes = useStyles();
+  const isAdmin = JSON.parse(getUserId()).isAdmin;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [messageColor, setMessageColor] = useState("");
@@ -59,6 +59,10 @@ function Card(props) {
     name: "",
     description: "",
   });
+  let isEdit = false;
+  if (props.location.state) {
+    isEdit = props.location.state.editing;
+  }
   const history = useHistory();
   const goBack = useCallback(() => history.push("/"), [history]);
 
@@ -71,13 +75,15 @@ function Card(props) {
   };
 
   const handelGetCard = async () => {
-    const data = await getCard(card).then((res) => res);
-    setFormData({
-      _id: data.card._id,
-      cardNumber: data.card.cardNumber,
-      name: data.card.name,
-      description: data.card.description,
-    });
+    if (card) {
+      const data = await getCard(card).then((res) => res);
+      setFormData({
+        _id: data.card._id,
+        cardNumber: data.card.cardNumber,
+        name: data.card.name,
+        description: data.card.description,
+      });
+    }
   };
 
   const handleSubmit = (formData) => async (e) => {
@@ -120,7 +126,10 @@ function Card(props) {
   };
 
   useEffect(() => {
-    if (card) handelGetCard();
+    if (isAdmin && !isEdit) {
+      goBack();
+    }
+    handelGetCard();
   }, [card]);
 
   return (
