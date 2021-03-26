@@ -32,7 +32,7 @@ const useStyles = makeStyles({
   },
   Input: {
     paddingTop: "0px",
-    marginTop: "-20px",
+    marginTop: "-15px",
     width: "45vh",
   },
   cell: {
@@ -100,7 +100,7 @@ export default function CollectionTable({ isAdmin, userId, getCollections }) {
         data.filter((val) => {
           if (
             val.collectionName.includes(filter) ||
-            (val.username && val.username.includes(filter))
+            (val.username && val.username.includes(filter) && isAdmin)
           )
             collectionFilter.push(val);
         });

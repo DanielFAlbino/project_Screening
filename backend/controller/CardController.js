@@ -17,6 +17,11 @@ const handleValidation = (req, res) => {
         "Fields required! Please provide name, description and card number. ",
     });
   }
+  if (req.body.cardNumber <= 0) {
+    return res.status(400).json({
+      message: "Card number must be higher then 0",
+    });
+  }
 
   /* if (Object.keys(req.body).length > 3) {
     return res.status(400).json({
@@ -91,6 +96,12 @@ exports.add = async (req, res) => {
   const card = await CardModel.findOne({
     cardNumber: req.body.cardNumber,
   });
+
+  if (req.body.cardNumber <= 0) {
+    return res.status(400).json({
+      message: "Card number must be higher then 0",
+    });
+  }
 
   if (!card) {
     let cards = {

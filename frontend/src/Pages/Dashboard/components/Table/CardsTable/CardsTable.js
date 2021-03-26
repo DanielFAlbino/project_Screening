@@ -28,15 +28,11 @@ const useStyles = makeStyles({
   table: {
     maxWidth: "100vh",
     marginTop: "0px",
-    parrdingTop: "0px",
   },
   Input: {
-    width: "80vh",
-    marginTop: "-3vh",
-  },
-  Small: {
-    width: "50vh",
-    marginTop: "-3vh",
+    paddingTop: "0px",
+    marginTop: "-15px",
+    width: "45vh",
   },
   cell: {
     width: "20%",
@@ -97,7 +93,10 @@ export default function CardsTable({ isAdmin, userId, collections }) {
     if (filter) {
       const cardsFilter = [];
       data.filter((val) => {
-        if (val.name.includes(filter) || val.username.includes(filter))
+        if (
+          val.name.includes(filter) ||
+          (val.username && val.username.includes(filter) && isAdmin)
+        )
           cardsFilter.push(val);
       });
       data = cardsFilter;
@@ -155,7 +154,7 @@ export default function CardsTable({ isAdmin, userId, collections }) {
       <TableContainer component={Paper}>
         <Table className={classes.table} aria-label="simple table">
           <TableHead>
-            <TableRow key={10}>
+            <TableRow key={10} className={classes.margins}>
               {!isAdmin ? (
                 <TableCell align="center" className={classes.cell}>
                   <Link to={"/card"}>
@@ -169,7 +168,7 @@ export default function CardsTable({ isAdmin, userId, collections }) {
               )}
               <TableCell align="left" scope="row" colSpan={cardHeader.length}>
                 <TextField
-                  className={classes.Small}
+                  className={classes.Input}
                   colSpan={!isAdmin ? 1 : 3}
                   id="standard-basic"
                   label={
