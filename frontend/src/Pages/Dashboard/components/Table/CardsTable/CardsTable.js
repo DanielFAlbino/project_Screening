@@ -10,6 +10,7 @@ import {
   TableBody,
   TableCell,
   TableContainer,
+  TablePagination,
   TableHead,
   TableRow,
   TextField,
@@ -61,8 +62,20 @@ export default function CardsTable({ isAdmin, userId, collections }) {
   const [addToCollection, setAddToCollection] = useState(false);
   const debounceFilter = useMemo(() => _.debounce(setFilter, 500), [setFilter]);
   const cardHeader = isAdmin
-    ? ["#", "Name", "Description", "Added by", "Actions"]
+    ? ["#", "Name", "Description", "User", "Actions"]
     : ["#", "Name", "Description", "Actions"];
+
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
+  };
 
   const handleChange = (event) => {
     const value = event.target.value;
@@ -201,96 +214,107 @@ export default function CardsTable({ isAdmin, userId, collections }) {
                 </TableCell>
               </TableRow>
             ) : (
-              cards.map((row, index) => (
-                <TableRow key={index}>
-                  <TableCell component="th" align="center">
-                    {row.cardNumber}
-                  </TableCell>
-                  <TableCell component="th" align="center">
-                    {row.name}
-                  </TableCell>
-                  <TableCell component="th" align="center">
-                    {row.description}
-                  </TableCell>
-                  {isAdmin ? (
+              cards
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((row, index) => (
+                  <TableRow key={index}>
                     <TableCell component="th" align="center">
-                      <Link
-                        className={classes.linkColor}
-                        to={`profile/${row.userId}`}
-                      >
-                        {row.username}
-                      </Link>
+                      {row.cardNumber}
                     </TableCell>
-                  ) : (
-                    <></>
-                  )}
-                  <TableCell align="center">
-                    <MenuItem>
-                      {addToCollection ? (
-                        <Grid>
-                          <IconButton
-                            aria-label="account of current user"
-                            aria-controls="menu-appbar"
-                            aria-haspopup="true"
-                            onClick={() => setAddToCollection(false)}
-                            color="inherit"
-                          >
-                            <Close />
-                          </IconButton>
-                          <Select
-                            collectionList={collections}
-                            card={row}
-                            onOpenAlert={setOpen}
-                            alertMessage={setMessage}
-                            alertMessageColor={setMessageColor}
-                            addedToCollection={setAddToCollection}
-                          />
-                        </Grid>
-                      ) : (
-                        <Grid>
-                          <IconButton
-                            aria-label="account of current user"
-                            aria-controls="menu-appbar"
-                            aria-haspopup="true"
-                            onClick={() => setAddToCollection(true)}
-                            color="inherit"
-                          >
-                            <Add />
-                          </IconButton>
-                          <IconButton
-                            aria-label="account of current user"
-                            aria-controls="menu-appbar"
-                            aria-haspopup="true"
-                            color="inherit"
-                          >
-                            <Link
-                              className={classes.linkColor}
-                              to={{
-                                pathname: `card/${row._id}`,
-                                state: { editing: true },
-                              }}
+                    <TableCell component="th" align="center">
+                      {row.name}
+                    </TableCell>
+                    <TableCell component="th" align="center">
+                      {row.description}
+                    </TableCell>
+                    {isAdmin ? (
+                      <TableCell component="th" align="center">
+                        <Link
+                          className={classes.linkColor}
+                          to={`profile/${row.userId}`}
+                        >
+                          {row.username}
+                        </Link>
+                      </TableCell>
+                    ) : (
+                      <></>
+                    )}
+                    <TableCell align="center">
+                      <MenuItem>
+                        {addToCollection ? (
+                          <Grid>
+                            <IconButton
+                              aria-label="account of current user"
+                              aria-controls="menu-appbar"
+                              aria-haspopup="true"
+                              onClick={() => setAddToCollection(false)}
+                              color="inherit"
                             >
-                              <Edit />
-                            </Link>
-                          </IconButton>
-                          <IconButton
-                            aria-label="account of current user"
-                            aria-controls="menu-appbar"
-                            aria-haspopup="true"
-                            onClick={onDelete(row._id, row.name)}
-                            color="inherit"
-                          >
-                            <Delete />
-                          </IconButton>
-                        </Grid>
-                      )}
-                    </MenuItem>
-                  </TableCell>
-                </TableRow>
-              ))
+                              <Close />
+                            </IconButton>
+                            <Select
+                              collectionList={collections}
+                              card={row}
+                              onOpenAlert={setOpen}
+                              alertMessage={setMessage}
+                              alertMessageColor={setMessageColor}
+                              addedToCollection={setAddToCollection}
+                            />
+                          </Grid>
+                        ) : (
+                          <Grid>
+                            <IconButton
+                              aria-label="account of current user"
+                              aria-controls="menu-appbar"
+                              aria-haspopup="true"
+                              onClick={() => setAddToCollection(true)}
+                              color="inherit"
+                            >
+                              <Add />
+                            </IconButton>
+                            <IconButton
+                              aria-label="account of current user"
+                              aria-controls="menu-appbar"
+                              aria-haspopup="true"
+                              color="inherit"
+                            >
+                              <Link
+                                className={classes.linkColor}
+                                to={{
+                                  pathname: `card/${row._id}`,
+                                  state: { editing: true },
+                                }}
+                              >
+                                <Edit />
+                              </Link>
+                            </IconButton>
+                            <IconButton
+                              aria-label="account of current user"
+                              aria-controls="menu-appbar"
+                              aria-haspopup="true"
+                              onClick={onDelete(row._id, row.name)}
+                              color="inherit"
+                            >
+                              <Delete />
+                            </IconButton>
+                          </Grid>
+                        )}
+                      </MenuItem>
+                    </TableCell>
+                  </TableRow>
+                ))
             )}
           </TableBody>
         </Table>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25, 100]}
+          component="div"
+          count={cards.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onChangePage={handleChangePage}
+          onChangeRowsPerPage={handleChangeRowsPerPage}
+        />
       </TableContainer>
     </>
   );

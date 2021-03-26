@@ -98,7 +98,7 @@ exports.signup = async (req, res) => {
     return res.status(409).json({ message: "Username already exists!" });
   }
 
-  var regex = /^[a-zA-Z]+$/;
+  var regex = /^[a-zA-Z ]+$/;
   const result = regex.test(req.body.name);
   if (Object.keys(req.body).length === 0) {
     return res.status(400).json({

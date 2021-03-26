@@ -7,6 +7,7 @@ import {
   TableBody,
   TableCell,
   TableContainer,
+  TablePagination,
   TableHead,
   TableRow,
   Typography,
@@ -49,6 +50,17 @@ export default function UsersTable() {
   const [filter, setFilter] = useState("");
   const debounceFilter = useMemo(() => _.debounce(setFilter, 500), [setFilter]);
   const goBack = useCallback(() => history.push("/"), [history]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
+  };
 
   const handleChange = (event) => {
     const value = event.target.value;
@@ -135,47 +147,58 @@ export default function UsersTable() {
                 </TableCell>
               </TableRow>
             ) : (
-              users.map((row) => (
-                <TableRow key={row._id}>
-                  <TableCell component="th" scope="row" align="center">
-                    {row.name}
-                  </TableCell>
-                  <TableCell align="center">{row.username}</TableCell>
-                  <TableCell align="center">
-                    <IconButton
-                      aria-label="account of current user"
-                      aria-controls="menu-appbar"
-                      aria-haspopup="true"
-                      color="inherit"
-                    >
-                      <Link
-                        to={{
-                          pathname: `profile/${row._id}`,
-                          state: { editing: true },
-                        }}
-                      >
-                        <Edit />
-                      </Link>
-                    </IconButton>
-                    {row._id === JSON.parse(userId)._id ? (
-                      <></>
-                    ) : (
+              users
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((row) => (
+                  <TableRow key={row._id}>
+                    <TableCell component="th" scope="row" align="center">
+                      {row.name}
+                    </TableCell>
+                    <TableCell align="center">{row.username}</TableCell>
+                    <TableCell align="center">
                       <IconButton
                         aria-label="account of current user"
                         aria-controls="menu-appbar"
                         aria-haspopup="true"
-                        onClick={() => onDelete(row._id, row.username)}
                         color="inherit"
                       >
-                        <Delete />
+                        <Link
+                          to={{
+                            pathname: `profile/${row._id}`,
+                            state: { editing: true },
+                          }}
+                        >
+                          <Edit />
+                        </Link>
                       </IconButton>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))
+                      {row._id === JSON.parse(userId)._id ? (
+                        <></>
+                      ) : (
+                        <IconButton
+                          aria-label="account of current user"
+                          aria-controls="menu-appbar"
+                          aria-haspopup="true"
+                          onClick={() => onDelete(row._id, row.username)}
+                          color="inherit"
+                        >
+                          <Delete />
+                        </IconButton>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))
             )}
           </TableBody>
         </Table>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25, 100]}
+          component="div"
+          count={users.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onChangePage={handleChangePage}
+          onChangeRowsPerPage={handleChangeRowsPerPage}
+        />
       </TableContainer>
     </Grid>
   );

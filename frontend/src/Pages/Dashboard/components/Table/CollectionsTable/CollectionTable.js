@@ -9,6 +9,7 @@ import {
   TableBody,
   TableCell,
   TableContainer,
+  TablePagination,
   TableHead,
   TableRow,
   TextField,
@@ -63,6 +64,19 @@ export default function CollectionTable({ isAdmin, userId, getCollections }) {
   const collectionHeader = isAdmin
     ? ["Collection", "User", "Actions"]
     : ["Collection", "Actions"];
+
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
+  };
+
   const handleChange = (event) => {
     const value = event.target.value;
     setFilter(value);
@@ -216,55 +230,66 @@ export default function CollectionTable({ isAdmin, userId, getCollections }) {
                 </TableCell>
               </TableRow>
             ) : (
-              collections.map((row, index) => (
-                <TableRow key={index}>
-                  <TableCell component="th" align="center">
-                    {row.collectionName}
-                  </TableCell>
-                  {isAdmin ? (
+              collections
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((row, index) => (
+                  <TableRow key={index}>
                     <TableCell component="th" align="center">
-                      <Link
-                        className={classes.linkColor}
-                        to={`profile/${row.userId}`}
-                      >
-                        {row.username}
-                      </Link>
+                      {row.collectionName}
                     </TableCell>
-                  ) : (
-                    <></>
-                  )}
-                  <TableCell component="th" align="center">
-                    <IconButton
-                      aria-label="account of current user"
-                      aria-controls="menu-appbar"
-                      aria-haspopup="true"
-                      color="inherit"
-                    >
-                      <Link
-                        className={classes.linkColor}
-                        to={{
-                          pathname: `collection/${row._id}`,
-                          state: { editing: true },
-                        }}
+                    {isAdmin ? (
+                      <TableCell component="th" align="center">
+                        <Link
+                          className={classes.linkColor}
+                          to={`profile/${row.userId}`}
+                        >
+                          {row.username}
+                        </Link>
+                      </TableCell>
+                    ) : (
+                      <></>
+                    )}
+                    <TableCell component="th" align="center">
+                      <IconButton
+                        aria-label="account of current user"
+                        aria-controls="menu-appbar"
+                        aria-haspopup="true"
+                        color="inherit"
                       >
-                        <Edit />
-                      </Link>
-                    </IconButton>
-                    <IconButton
-                      aria-label="account of current user"
-                      aria-controls="menu-appbar"
-                      aria-haspopup="true"
-                      onClick={onDelete(row._id, row.collectionName)}
-                      color="inherit"
-                    >
-                      <Delete />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))
+                        <Link
+                          className={classes.linkColor}
+                          to={{
+                            pathname: `collection/${row._id}`,
+                            state: { editing: true },
+                          }}
+                        >
+                          <Edit />
+                        </Link>
+                      </IconButton>
+                      <IconButton
+                        aria-label="account of current user"
+                        aria-controls="menu-appbar"
+                        aria-haspopup="true"
+                        onClick={onDelete(row._id, row.collectionName)}
+                        color="inherit"
+                      >
+                        <Delete />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))
             )}
           </TableBody>
         </Table>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25, 100]}
+          component="div"
+          count={collections.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onChangePage={handleChangePage}
+          onChangeRowsPerPage={handleChangeRowsPerPage}
+        />
       </TableContainer>
     </>
   );
