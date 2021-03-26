@@ -64,7 +64,7 @@ function Card(props) {
   const [open, setOpen] = useState(false);
   const [cardId, setCardId] = useState("");
   const [formData, setFormData] = useState({
-    cardNumber: 0,
+    cardNumber: 1,
     name: "",
     description: "",
   });
@@ -174,6 +174,7 @@ function Card(props) {
             className={classes.txt}
             name="cardNumber"
             label="card number"
+            inputProps={{ min: 1, max: 10, step: 1 }}
             type="number"
             onChange={handleChange("cardNumber")}
             value={formData.cardNumber}
