@@ -25,6 +25,7 @@ import Navbar from "../../Components/NavBar/NavBar";
 const useStyles = makeStyles({
   container: {
     Width: "80vh",
+    marginTop: "20px",
     marginLeft: "40px",
     marginRight: "40px",
   },
@@ -96,7 +97,7 @@ export default function UsersTable() {
   return (
     <Grid container>
       <Navbar />
-      <TableContainer component={Paper} className={classes.conainter}>
+      <TableContainer component={Paper} className={classes.container}>
         <Table
           className={classes.table}
           size="small"
@@ -104,7 +105,7 @@ export default function UsersTable() {
         >
           <TableHead>
             <TableRow>
-              <TableCell align="left">
+              <TableCell align="left" colSpan={3}>
                 <TextField
                   className={classes.Input}
                   id="standard-basic"
@@ -141,36 +142,34 @@ export default function UsersTable() {
                   </TableCell>
                   <TableCell align="center">{row.username}</TableCell>
                   <TableCell align="center">
-                    <MenuItem align="center">
+                    <IconButton
+                      aria-label="account of current user"
+                      aria-controls="menu-appbar"
+                      aria-haspopup="true"
+                      color="inherit"
+                    >
+                      <Link
+                        to={{
+                          pathname: `profile/${row._id}`,
+                          state: { editing: true },
+                        }}
+                      >
+                        <Edit />
+                      </Link>
+                    </IconButton>
+                    {row._id === JSON.parse(userId)._id ? (
+                      <></>
+                    ) : (
                       <IconButton
                         aria-label="account of current user"
                         aria-controls="menu-appbar"
                         aria-haspopup="true"
+                        onClick={() => onDelete(row._id, row.username)}
                         color="inherit"
                       >
-                        <Link
-                          to={{
-                            pathname: `profile/${row._id}`,
-                            state: { editing: true },
-                          }}
-                        >
-                          <Edit />
-                        </Link>
+                        <Delete />
                       </IconButton>
-                      {row._id === JSON.parse(userId)._id ? (
-                        <></>
-                      ) : (
-                        <IconButton
-                          aria-label="account of current user"
-                          aria-controls="menu-appbar"
-                          aria-haspopup="true"
-                          onClick={() => onDelete(row._id, row.username)}
-                          color="inherit"
-                        >
-                          <Delete />
-                        </IconButton>
-                      )}
-                    </MenuItem>
+                    )}
                   </TableCell>
                 </TableRow>
               ))
