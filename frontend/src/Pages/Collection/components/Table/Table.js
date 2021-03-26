@@ -1,6 +1,7 @@
 import { React, useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import {
+  Collapse,
   Grid,
   Table,
   Typography,
@@ -11,7 +12,8 @@ import {
   IconButton,
   TableRow,
 } from "@material-ui/core/";
-import { Delete } from "@material-ui/icons";
+import { Delete, Close } from "@material-ui/icons";
+import Alert from "@material-ui/lab/Alert";
 
 import { getCollection, update } from "../../../../Services/collection";
 import { getCard } from "../../../../Services/card";
@@ -21,23 +23,36 @@ const useStyles = makeStyles({
     minWidth: "100vh",
     maxWidth: "122vh",
   },
+  Flag: {
+    position: "absolute",
+    top: "80px",
+    right: "20px",
+    width: "300px",
+    zIndex: "2",
+  },
 });
 
 export default function TableData({ collectionId }) {
   const classes = useStyles();
+  const [collName, setCollName] = useState("");
   const [card, setCard] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(true);
+
+  const [message, setMessage] = useState("");
+  const [messageColor, setMessageColor] = useState("");
+  const [open, setOpen] = useState(false);
 
   const titles = ["#", "Name", "Description", "Actions"];
 
   const handleCards = async () => {
     let cardsList = [];
     const data = await getCollection(collectionId).then((res) => {
-      return res.collections.cardsList;
+      return res.collections;
     });
-    if (data && data.length > 0) {
+    setCollName(data.collectionName);
+    if (data.cardsList && data.cardsList.length > 0) {
       await Promise.all(
-        data.map(async (card) => {
+        data.cardsList.map(async (card) => {
           const res = await getCard(card._id);
           cardsList.push(res.card);
         })
@@ -62,13 +77,22 @@ export default function TableData({ collectionId }) {
       data.splice(index, 1);
       setCard(data);
       const collection = {
-        cardsList: data,
+        collectionName: collName,
+        cardsList: data.map((card) => {
+          return { _id: card._id };
+        }),
       };
-
-      const message = await update(collectionId, collection).then((res) => {
-        return res.message;
-      });
-      alert(message);
+      await update(collectionId, collection)
+        .then((res) => {
+          setMessage(res.message);
+          setMessageColor("success");
+          setOpen(true);
+        })
+        .catch((err) => {
+          setMessage(err.response.data.message);
+          setMessageColor("error");
+          setOpen(true);
+        });
       handleCards();
     }
   };
@@ -79,6 +103,28 @@ export default function TableData({ collectionId }) {
 
   return (
     <Grid>
+      {message ? (
+        <Collapse in={open} className={classes.Flag}>
+          <Alert
+            severity={messageColor}
+            action={
+              <IconButton
+                aria-label="close"
+                size="small"
+                onClick={() => {
+                  setOpen(false);
+                }}
+              >
+                <Close fontSize="inherit" />
+              </IconButton>
+            }
+          >
+            {message}
+          </Alert>
+        </Collapse>
+      ) : (
+        <></>
+      )}
       <TableContainer>
         <Table className={classes.table} aria-label="simple table">
           <TableHead>

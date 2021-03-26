@@ -23,9 +23,14 @@ import { getUserId } from "../../Utils/localStorage";
 import Navbar from "../../Components/NavBar/NavBar";
 
 const useStyles = makeStyles({
+  container: {
+    Width: "80vh",
+    marginLeft: "40px",
+    marginRight: "40px",
+  },
   table: {
     marginTop: "10px",
-    minWidth: 650,
+    minWidth: "100vh",
   },
   Input: {
     paddingTop: "0px",
@@ -89,9 +94,9 @@ export default function UsersTable() {
   }, [filter]);
 
   return (
-    <Grid>
+    <Grid container>
       <Navbar />
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} className={classes.conainter}>
         <Table
           className={classes.table}
           size="small"
@@ -103,7 +108,7 @@ export default function UsersTable() {
                 <TextField
                   className={classes.Input}
                   id="standard-basic"
-                  label="Search by collection or user"
+                  label="Search by user or username"
                   onChange={handleChange}
                   value={filter}
                 />
@@ -143,7 +148,12 @@ export default function UsersTable() {
                         aria-haspopup="true"
                         color="inherit"
                       >
-                        <Link to={`profile/${row._id}`}>
+                        <Link
+                          to={{
+                            pathname: `profile/${row._id}`,
+                            state: { editing: true },
+                          }}
+                        >
                           <Edit />
                         </Link>
                       </IconButton>

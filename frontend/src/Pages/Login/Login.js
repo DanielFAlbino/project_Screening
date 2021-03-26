@@ -64,20 +64,21 @@ function Login() {
   const handleSubmit = (formData) => async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    if (!formData.username.trim() || !formData.password.trim()) {
+    /*     if (!formData.username.trim() || !formData.password.trim()) {
       setIsSubmitting(false);
       setMessage("All fields are required");
       return;
     } else {
-      try {
-        await login(formData).then((res) => {
-          setUser(res.user);
-          setToken(res.token);
-          goTo();
-        });
-      } catch (err) {
-        setMessage(err.response.data.message);
-      }
+      
+    } */
+    try {
+      await login(formData).then((res) => {
+        setUser(res.user);
+        setToken(res.token);
+        goTo();
+      });
+    } catch (err) {
+      setMessage(err.response.data.message);
     }
 
     setIsSubmitting(false);

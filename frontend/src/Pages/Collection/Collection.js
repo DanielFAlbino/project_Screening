@@ -48,6 +48,7 @@ function Collection(props) {
   const collection = props.match.params.collectionId;
   const isAdmin = JSON.parse(getUserId()).isAdmin;
   const [collections, setCollections] = useState([]);
+  const [collectionId, setCollectionId] = useState("");
   const [formData, setFormData] = useState({
     collectionName: "",
   });
@@ -71,8 +72,8 @@ function Collection(props) {
       });
       const arr = {
         collectionName: data.collectionName,
-        _id: data._id,
       };
+      setCollectionId(data._id);
       setCollections(data.collections);
 
       setFormData(arr);
@@ -91,13 +92,15 @@ function Collection(props) {
     }
 
     if (collection) {
-      await update(formData._id, formData)
+      await update(collectionId, formData)
         .then((res) => {
           setMessage(res.message);
           setMessageColor("success");
+          setOpen(true);
+          window.setInterval(goBack(), 1000);
         })
         .catch((err) => {
-          setMessage(err.message);
+          setMessage(err.response.data.message);
           setMessageColor("error");
         });
       setOpen(true);
@@ -106,14 +109,20 @@ function Collection(props) {
     }
     await register(formData)
       .then((res) => {
+        setFormData({
+          ...formData,
+          collectionName: "",
+        });
         setMessage(res.message);
         setMessageColor("success");
+        setOpen(true);
       })
       .catch((err) => {
-        setMessage(err.message);
+        setMessage(err.response.data.message);
         setMessageColor("error");
+        setOpen(true);
       });
-    setOpen(true);
+
     setIsSubmitting(false);
   };
 

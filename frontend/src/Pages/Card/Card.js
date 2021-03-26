@@ -29,13 +29,21 @@ const useStyles = makeStyles((theme) => ({
   },
   btn: {
     margin: "10px",
-    marginTop: "40px",
+    marginTop: "80px",
     width: "40vh",
     height: "40px",
   },
   Area: {
+    top: "100px",
     margin: "10px",
-    width: "90vh",
+    height: "50px",
+  },
+  txtfield: {
+    top: "-28vh",
+    width: "80vh !important",
+  },
+  txt: {
+    width: "40vh !important",
   },
   Flag: {
     position: "absolute",
@@ -54,6 +62,7 @@ function Card(props) {
   const [message, setMessage] = useState("");
   const [messageColor, setMessageColor] = useState("");
   const [open, setOpen] = useState(false);
+  const [cardId, setCardId] = useState("");
   const [formData, setFormData] = useState({
     cardNumber: 0,
     name: "",
@@ -77,8 +86,8 @@ function Card(props) {
   const handelGetCard = async () => {
     if (card) {
       const data = await getCard(card).then((res) => res);
+      setCardId(data.card._id);
       setFormData({
-        _id: data.card._id,
         cardNumber: data.card.cardNumber,
         name: data.card.name,
         description: data.card.description,
@@ -89,35 +98,31 @@ function Card(props) {
   const handleSubmit = (formData) => async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    const user = JSON.parse(getUserId());
-    formData.userId = user._id;
 
-    if (
-      !formData.name.trim() ||
-      !formData.description.trim() ||
-      formData.cardNumber === 0
-    ) {
-      setIsSubmitting(false);
-      return setMessage("All fields are required");
-    }
     if (card) {
-      await update(formData._id, formData)
+      await update(cardId, formData)
         .then((res) => {
           setMessage(res.message);
           setMessageColor("success");
         })
         .catch((err) => {
-          setMessage(err.message);
+          setMessage(err.response.data.message);
           setMessageColor("error");
         });
     } else {
       await register(formData)
         .then((res) => {
+          setFormData({
+            ...formData,
+            cardNumber: "",
+            name: "",
+            description: "",
+          });
           setMessage(res.message);
           setMessageColor("success");
         })
         .catch((err) => {
-          setMessage(err.message);
+          setMessage(err.response.data.message);
           setMessageColor("error");
         });
     }
@@ -164,8 +169,9 @@ function Card(props) {
         autoComplete="off"
         onSubmit={handleSubmit(formData)}
       >
-        <Grid>
+        <Grid item lg={12}>
           <TextField
+            className={classes.txt}
             name="cardNumber"
             label="card number"
             type="number"
@@ -173,6 +179,7 @@ function Card(props) {
             value={formData.cardNumber}
           />
           <TextField
+            className={classes.txt}
             name="name"
             label="name"
             type="text"
@@ -180,17 +187,15 @@ function Card(props) {
             onChange={handleChange("name")}
           />
         </Grid>
-        <Grid>
-          <TextareaAutosize
-            aria-label="empty textarea"
-            className={classes.Area}
-            rows={5}
-            rowsMax={10}
-            defaultValue={formData.description}
+        <Grid item lg={12} className={classes.Area}>
+          <TextField
+            className={classes.txtfield}
+            label="description"
+            value={formData.description}
             onChange={handleChange("description")}
           />
         </Grid>
-        <Grid>
+        <Grid item lg={12}>
           <Button
             className={classes.btn}
             disabled={isSubmitting}

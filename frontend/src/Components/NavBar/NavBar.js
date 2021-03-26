@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function NavBar() {
-  const user = getUserId();
+  var user = getUserId();
   const classes = useStyles();
 
   const handleLogout = () => {
@@ -42,7 +42,10 @@ function NavBar() {
     window.location.assign("/login");
   };
 
-  useEffect(() => {}, [user]);
+  useEffect(() => {
+    user = getUserId();
+  }, [getUserId]);
+
   return (
     <AppBar position="static">
       <Toolbar>
@@ -89,7 +92,10 @@ function NavBar() {
             >
               <Link
                 className={classes.linkColor}
-                to={`/profile/${JSON.parse(user)._id}`}
+                to={{
+                  pathname: `/profile/${JSON.parse(user)._id}`,
+                  state: { editing: false },
+                }}
               >
                 <Tooltip title="Profile" aria-label="profile">
                   <AccountCircle />

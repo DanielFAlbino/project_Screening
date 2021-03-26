@@ -13,18 +13,30 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function SelectData({ collectionList, card, addedToCollection }) {
+function SelectData({
+  collectionList,
+  card,
+  addedToCollection,
+  onOpenAlert,
+  alertMessage,
+  alertMessageColor,
+}) {
   const classes = useStyles();
   const [collectionId, setCollectionId] = useState("");
+
   let maxPerCard = 0;
+
   const onAdd = async (event) => {
+    event.preventDefault();
     const coll = event.target.value;
+    setCollectionId(coll._id);
     if (coll.cardsList) {
       if (coll.cardsList.length == 60) {
         addedToCollection(false);
-        return alert("Collection limit reached!");
+        alertMessage("Collection limit reached!");
+        alertMessageColor("error");
+        onOpenAlert(true);
       }
-
       coll.cardsList.map((cards) => {
         if (cards._id === card._id) {
           return maxPerCard++;
@@ -33,19 +45,34 @@ function SelectData({ collectionList, card, addedToCollection }) {
 
       if (maxPerCard === 4) {
         addedToCollection(false);
-        return alert(
+        alertMessage(
           "You can only have 4 cards with the same name/number in your collection"
         );
+        alertMessageColor("error");
+        onOpenAlert(true);
       }
     }
+
     if (!coll.cardsList) {
       coll.cardsList = [];
     }
     coll.cardsList.push({ _id: card._id });
-    const message = await update(coll._id, coll).then((res) => {
-      return res.message;
-    });
-    alert(message);
+
+    const data = {
+      collectionName: coll.collectionName,
+      cardsList: coll.cardsList,
+    };
+    await update(coll._id, data)
+      .then((res) => {
+        alertMessage("Card added to collection");
+        alertMessageColor("success");
+        onOpenAlert(true);
+      })
+      .catch((error) => {
+        alertMessage(error.response.data.message);
+        alertMessageColor("error");
+        onOpenAlert(true);
+      });
     addedToCollection(false);
   };
 
@@ -61,7 +88,9 @@ function SelectData({ collectionList, card, addedToCollection }) {
         onChange={onAdd}
       >
         {collectionList.map((row) => {
-          return <MenuItem value={row}>{row.collectionName}</MenuItem>;
+          if (row.userId == card.userId) {
+            return <MenuItem value={row}>{row.collectionName}</MenuItem>;
+          }
         })}
       </Select>
     </FormControl>

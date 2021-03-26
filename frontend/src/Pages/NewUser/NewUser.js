@@ -67,29 +67,13 @@ function Login() {
   const handleSubmit = (formData) => async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    var regex = /^[a-zA-Z]+$/;
-    const res = regex.test(formData.name);
-    if (!res) {
-      setMessage("Name must contain only letters");
-      setIsSubmitting(false);
-      return;
-    }
-    if (
-      !formData.username.trim() ||
-      !formData.name.trim() ||
-      !formData.password.trim()
-    ) {
-      setIsSubmitting(false);
-      setMessage("All fields are required");
-      return;
-    } else {
-      try {
-        await add(formData).then((res) => {
-          goTo();
-        });
-      } catch (err) {
-        setMessage(err.response.data.message);
-      }
+    try {
+      await add(formData).then((res) => {
+        setMessage(res.message);
+        goTo();
+      });
+    } catch (err) {
+      setMessage(err.response.data.message);
     }
     setIsSubmitting(false);
   };

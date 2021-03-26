@@ -13,7 +13,7 @@ import {
 import { Close } from "@material-ui/icons";
 import Alert from "@material-ui/lab/Alert";
 
-import { getUserId } from "../../Utils/localStorage";
+import { getUserId, setUser } from "../../Utils/localStorage";
 import { update, getUser } from "../../Services/user";
 import Navbar from "../../Components/NavBar/NavBar";
 
@@ -56,7 +56,6 @@ function Profile(props) {
   const user = props.match.params.userId;
   const classes = useStyles();
   const [message, setMessage] = useState("");
-  const [checked, setChecked] = useState(false);
   const [messageColor, setMessageColor] = useState("");
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -67,7 +66,10 @@ function Profile(props) {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  var isEdit = false;
+  if (props.location.state) {
+    isEdit = props.location.state.editing;
+  }
   const history = useHistory();
   const goBack = useCallback(() => history.goBack(), [history]);
 
@@ -86,7 +88,7 @@ function Profile(props) {
     }
 
     const data = await getUser(user).then((res) => {
-      return res;
+      return res.user;
     });
 
     const arr = {
@@ -95,7 +97,6 @@ function Profile(props) {
       isAdmin: data.isAdmin,
     };
 
-    arr.isAdmin ? setChecked(true) : setChecked(false);
     setIsSubmitting(false);
     setFormData(arr);
   };
@@ -103,18 +104,21 @@ function Profile(props) {
   const handleSubmit = (formData) => async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    await update(userId, formData)
-      .then((res) => {
+    try {
+      await update(user, formData).then((res) => {
         setOpen(true);
         setIsSubmitting(false);
         setMessage(res.message);
         setMessageColor("success");
-      })
-      .catch((err) => {
-        setOpen(true);
-        setMessage(err.message);
-        setMessageColor("error");
+        if (user == userId && !formData.isAdmin) {
+          setUser({ _id: userId, isAdmin: false });
+        }
       });
+    } catch (err) {
+      setOpen(true);
+      setMessage(err.response.data.message);
+      setMessageColor("error");
+    }
     setIsSubmitting(false);
   };
 
@@ -196,11 +200,12 @@ function Profile(props) {
           />
         </Grid>
         <Grid>
-          {isAdmin ? (
+          {isAdmin && isEdit ? (
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={checked}
+                  disabled={userId == user ? true : false}
+                  checked={formData.isAdmin}
                   onChange={handleChange("isAdmin")}
                   name="checkedB"
                   color="primary"

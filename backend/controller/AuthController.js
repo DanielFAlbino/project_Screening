@@ -4,6 +4,39 @@ const bcrypt = require("bcryptjs");
 require("dotenv").config();
 
 exports.login = async (req, res) => {
+  if (!req.body.username || !req.body.password) {
+    return res.status(400).json({
+      message: "Please fill all the fields!",
+    });
+  }
+  if (Object.keys(req.body).length === 0) {
+    return res.status(400).json({
+      message: "The object is empty! please provide username and password",
+    });
+  }
+
+  if (
+    (Object.keys(req.body).length > 0 &&
+      (!req.body.username || !req.body.password)) ||
+    Object.keys(req.body).length > 2
+  ) {
+    return res.status(400).json({
+      message: "Please only provide correct username and password keys/values",
+    });
+  }
+
+  if (!isNaN(req.body.username)) {
+    return res.status(400).json({
+      message: "Username can't contain only numbers",
+    });
+  }
+
+  if (typeof req.body.password !== "string") {
+    return res.status(400).json({
+      message: "Password must be a string",
+    });
+  }
+
   const user = await UserModel.findOne({
     username: req.body.username,
   })
@@ -57,20 +90,76 @@ exports.getUser = async (req, res) => {
 };
 
 exports.signup = async (req, res) => {
-  const user = await UserModel.findOne({
+  const findUser = await UserModel.findOne({
     username: req.body.username,
   });
 
-  if (!user) {
-    // Create an user object
-    let user = new UserModel({
-      username: req.body.username,
-      name: req.body.name,
-      password: req.body.password,
-      isAdmin: false,
+  if (findUser) {
+    return res.status(409).json({ message: "Username already exists!" });
+  }
+
+  var regex = /^[a-zA-Z]+$/;
+  const result = regex.test(req.body.name);
+  if (Object.keys(req.body).length === 0) {
+    return res.status(400).json({
+      message:
+        "The object is empty! please provide username, name and password",
+    });
+  }
+  if (Object.keys(req.body).length < 3) {
+    return res.status(400).json({
+      message:
+        "There are fields missing! Please provide username, name and password",
+    });
+  }
+  if (!req.body.username || !req.body.name || !req.body.password) {
+    return res.status(400).json({
+      message: "Please fill all the fields!",
+    });
+  }
+  if (
+    (Object.keys(req.body).length > 0 &&
+      (!req.body.username || !req.body.name || !req.body.password)) ||
+    Object.keys(req.body).length > 3
+  ) {
+    return res.status(400).json({
+      message: "Please only provide username, name and password",
+    });
+  }
+  if (!isNaN(req.body.username))
+    return res.status(400).json({
+      message: "Username can't contain only numbers",
     });
 
-    // Save User in the database
+  if (!result) {
+    return res
+      .status(400)
+      .json({ message: "Name must contain only letters and can't be empty" });
+  }
+
+  if (
+    !req.body.username.trim() ||
+    !req.body.name.trim() ||
+    !req.body.password.trim()
+  ) {
+    return res.status(400).json({ message: "All fields required!" });
+  }
+
+  if (!req.body.username || !req.body.name || !req.body.password) {
+    return res
+      .status(400)
+      .json({ message: "Please provide username, name and password" });
+  }
+
+  // Create an user object
+  let user = await new UserModel({
+    username: req.body.username,
+    name: req.body.name,
+    password: req.body.password,
+    isAdmin: false,
+  });
+  // Save User in the database
+  if (user) {
     user.save((err, registeredUser) => {
       if (err) {
         console.log(err);
@@ -78,11 +167,8 @@ exports.signup = async (req, res) => {
         // create payload then Generate an access token
         let payload = { id: registeredUser._id, isAdmin: req.body.isAdmin };
         jwt.sign(payload, process.env.JWT_KEY);
-
-        res.status(200).json({ message: "Registed!" });
+        return res.status(200).json({ message: "Registed!" });
       }
     });
-  } else {
-    return res.status(409).json({ message: "Username already exists!" });
   }
 };
